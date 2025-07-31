@@ -1,0 +1,14 @@
+{
+  "name": "real-estate-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.42.0",
+    "dotenv": "^16.4.0",
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,72 @@
+// mappers/mapCommonFields.js
+export function mapCommonFields(idx = {}, vow = {}) {
+  return {
+    ListingKey: vow.ListingKey || idx.ListingKey || null,
+    ListPrice: vow.ListPrice ?? idx.ListPrice ?? null,
+    ClosePrice: vow.ClosePrice ?? idx.ClosePrice ?? null,
+    MlsStatus: vow.MlsStatus ?? idx.MlsStatus ?? null,
+    ContractStatus: vow.ContractStatus ?? idx.ContractStatus ?? null,
+    StandardStatus: vow.StandardStatus ?? idx.StandardStatus ?? null,
+    TransactionType: vow.TransactionType ?? idx.TransactionType ?? null,
+    PropertyType: vow.PropertyType ?? idx.PropertyType ?? null,
+    PropertySubType: vow.PropertySubType ?? idx.PropertySubType ?? null,
+    ArchitecturalStyle: vow.ArchitecturalStyle ?? idx.ArchitecturalStyle ?? null,
+    UnparsedAddress: vow.UnparsedAddress ?? idx.UnparsedAddress ?? null,
+    StreetNumber: vow.StreetNumber ?? idx.StreetNumber ?? null,
+    StreetName: vow.StreetName ?? idx.StreetName ?? null,
+    StreetSuffix: vow.StreetSuffix ?? idx.StreetSuffix ?? null,
+    City: vow.City ?? idx.City ?? null,
+    StateOrProvince: vow.StateOrProvince ?? idx.StateOrProvince ?? null,
+    PostalCode: vow.PostalCode ?? idx.PostalCode ?? null,
+    CountyOrParish: vow.CountyOrParish ?? idx.CountyOrParish ?? null,
+    KitchensAboveGrade: vow.KitchensAboveGrade ?? idx.KitchensAboveGrade ?? null,
+    BedroomsAboveGrade: vow.BedroomsAboveGrade ?? idx.BedroomsAboveGrade ?? null,
+    BathroomsTotalInteger: vow.BathroomsTotalInteger ?? idx.BathroomsTotalInteger ?? null,
+    DenFamilyRoomYN: vow.DenFamilyRoomYN ?? idx.DenFamilyRoomYN ?? null,
+    PublicRemarks: vow.PublicRemarks ?? idx.PublicRemarks ?? null,
+
+    PhotosChangeTimestamp: vow.PhotosChangeTimestamp ?? idx.PhotosChangeTimestamp ?? null,
+    MediaChangeTimestamp: vow.MediaChangeTimestamp ?? idx.MediaChangeTimestamp ?? null,
+    ModificationTimestamp: vow.ModificationTimestamp ?? idx.ModificationTimestamp ?? null,
+    SystemModificationTimestamp: vow.SystemModificationTimestamp ?? idx.SystemModificationTimestamp ?? null,
+
+    OriginalEntryTimestamp: vow.OriginalEntryTimestamp ?? idx.OriginalEntryTimestamp ?? null,
+    SoldConditionalEntryTimestamp: vow.SoldConditionalEntryTimestamp ?? idx.SoldConditionalEntryTimestamp ?? null,
+    SoldEntryTimestamp: vow.SoldEntryTimestamp ?? idx.SoldEntryTimestamp ?? null,
+    SuspendedEntryTimestamp: vow.SuspendedEntryTimestamp ?? idx.SuspendedEntryTimestamp ?? null,
+    TerminatedEntryTimestamp: vow.TerminatedEntryTimestamp ?? idx.TerminatedEntryTimestamp ?? null,
+    CloseDate: vow.CloseDate ?? idx.CloseDate ?? null,
+    ConditionalExpiryDate: vow.ConditionalExpiryDate ?? idx.ConditionalExpiryDate ?? null,
+    PurchaseContractDate: vow.PurchaseContractDate ?? idx.PurchaseContractDate ?? null,
+    SuspendedDate: vow.SuspendedDate ?? idx.SuspendedDate ?? null,
+    TerminatedDate: vow.TerminatedDate ?? idx.TerminatedDate ?? null,
+    UnavailableDate: vow.UnavailableDate ?? idx.UnavailableDate ?? null,
+
+    Cooling: vow.Cooling ?? idx.Cooling ?? null,
+    Basement: vow.Basement ?? idx.Basement ?? null,
+    CityRegion: vow.CityRegion ?? idx.CityRegion ?? null,
+    HeatType: vow.HeatType ?? idx.HeatType ?? null,
+
+    ExteriorFeatures: vow.ExteriorFeatures ?? idx.ExteriorFeatures ?? null,
+    InteriorFeatures: vow.InteriorFeatures ?? idx.InteriorFeatures ?? null,
+    FireplaceYN: vow.FireplaceYN ?? idx.FireplaceYN ?? null,
+    PoolFeatures: vow.PoolFeatures ?? idx.PoolFeatures ?? null,
+    PropertyFeatures: vow.PropertyFeatures ?? idx.PropertyFeatures ?? null,
+    Sewer: vow.Sewer ?? idx.Sewer ?? null,
+
+    LivingAreaRange: vow.LivingAreaRange ?? idx.LivingAreaRange ?? null,
+    CoveredSpaces: vow.CoveredSpaces ?? idx.CoveredSpaces ?? null,
+    WaterfrontYN: vow.WaterfrontYN ?? idx.WaterfrontYN ?? null,
+    BedroomsBelowGrade: vow.BedroomsBelowGrade ?? idx.BedroomsBelowGrade ?? null,
+    CoveredSpaces: vow.CoveredSpaces ?? idx.CoveredSpaces ?? null,
+    KitchensBelowGrade: vow.KitchensBelowGrade ?? idx.KitchensBelowGrade ?? null,
+    KitchensTotal: vow.KitchensTotal ?? idx.KitchensTotal ?? null,
+    LotSizeRangeAcres: vow.LotSizeRangeAcres ?? idx.LotSizeRangeAcres ?? null,
+
+    ParkingSpaces: vow.ParkingSpaces ?? idx.ParkingSpaces ?? null,
+    PossessionDetails: vow.PossessionDetails ?? idx.PossessionDetails ?? null,
+    PossessionType: vow.PossessionType ?? idx.PossessionType ?? null,
+
+    ParkingTotal: vow.ParkingTotal ?? idx.ParkingTotal ?? null
+  };
+}
