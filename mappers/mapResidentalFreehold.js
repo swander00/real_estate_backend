@@ -1,5 +1,5 @@
-// mappers/mapFreeholdSale.js
-export function mapFreeholdSale(idx = {}, vow = {}) {
+// mappers/mapResidentalFreehold.js
+export function mapResidentalFreehold(idx = {}, vow = {}) {
   return {
     LotDepth: vow.LotDepth ?? idx.LotDepth ?? null,
     LotWidth: vow.LotWidth ?? idx.LotWidth ?? null,

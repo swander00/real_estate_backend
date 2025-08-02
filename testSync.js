@@ -2,74 +2,142 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import { fetchPagesWithSkip } from './lib/fetchFeed.js';
 import { mapCommonFields } from './mappers/mapCommonFields.js';
-import { mapFreeholdSale } from './mappers/mapFreeholdSale.js';
+import { mapResidentalFreehold } from './mappers/mapResidentalFreehold.js';
+import { mapPropertyOpenhouse } from './mappers/mapPropertyOpenhouse.js';
+import { mapResidentialLease } from './mappers/mapResidentialLease.js';
+import { mapResidentialCondo } from './mappers/mapResidentialCondo.js';
+import { mapPropertyMedia } from './mappers/mapPropertyMedia.js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const IDX_URL = process.env.IDX_FREEHOLD_SALE_URL;
-const VOW_URL = process.env.VOW_FREEHOLD_SALE_URL;
-const IDX_TOKEN = process.env.IDX_TOKEN;
-const VOW_TOKEN = process.env.VOW_TOKEN;
+const URLS = {
+  IDX:       { url: process.env.IDX_URL,   token: process.env.IDX_TOKEN },
+  VOW:       { url: process.env.VOW_URL,   token: process.env.VOW_TOKEN },
+  Freehold:  { url: process.env.FREEHOLD_URL, token: process.env.IDX_TOKEN },
+  Condo:     { url: process.env.CONDO_URL,   token: process.env.IDX_TOKEN },
+  Lease:     { url: process.env.LEASE_URL,   token: process.env.IDX_TOKEN },
+  OpenHouse: { url: process.env.OPENHOUSE_URL, token: process.env.IDX_TOKEN },
+  Media:     { url: process.env.MEDIA_URL,   token: process.env.IDX_TOKEN }
+};
 
-const COMMON_TABLE = 'common_fields';
-const FREEHOLD_TABLE = 'residential_freehold_sale';
-
-async function testSync() {
-  console.log('🧨 Clearing existing records...');
-  await supabase.from(FREEHOLD_TABLE).delete().neq('listing_key', '');
-  await supabase.from(COMMON_TABLE).delete().neq('ListingKey', '');
-  console.log('🧼 Cleared all rows.');
-
-  console.log('🔍 Fetching IDX...');
-  const idxRaw = await fetchPagesWithSkip(IDX_URL, IDX_TOKEN);
-  const idxMap = Object.fromEntries(idxRaw.map(item => [item.ListingKey, item]));
-
-  console.log('🔍 Fetching VOW...');
-  const vowRaw = await fetchPagesWithSkip(VOW_URL, VOW_TOKEN);
-  const vowMap = Object.fromEntries(vowRaw.map(item => [item.ListingKey, item]));
-
-  console.log(`📦 IDX: ${idxRaw.length} | VOW: ${vowRaw.length}`);
-
-  const allKeys = new Set([...Object.keys(idxMap), ...Object.keys(vowMap)]);
-
-  const commonRows = [];
-  const freeholdRows = [];
-
-  for (const listingKey of allKeys) {
-    const idx = idxMap[listingKey] || {};
-    const vow = vowMap[listingKey] || {};
-
-    const common = mapCommonFields(idx, vow);
-    const freehold = mapFreeholdSale(idx, vow);
-
-    commonRows.push(common);
-    freeholdRows.push({ listing_key: listingKey, ...freehold });
-  }
-
-  console.log(`🧩 Upserting ${commonRows.length} into common_fields...`);
-  const { error: commonErr } = await supabase
-    .from(COMMON_TABLE)
-    .upsert(commonRows, { onConflict: 'ListingKey' });
-
-  if (commonErr) {
-    console.error('❌ Failed to upsert common_fields:', commonErr.message);
-    return;
-  }
-
-  console.log(`🏘️ Upserting ${freeholdRows.length} into residential_freehold_sale...`);
-  const { error: freeholdErr } = await supabase
-    .from(FREEHOLD_TABLE)
-    .upsert(freeholdRows, { onConflict: 'listing_key' });
-
-  if (freeholdErr) {
-    console.error('❌ Failed to upsert residential_freehold_sale:', freeholdErr.message);
-    return;
-  }
-
-  console.log('✅ Full sync complete.');
+async function fetchAndLog(name) {
+  console.log(`🔍 ${name}…`);
+  const prevLog = console.log;
+  console.log = (...args) => args[0].startsWith('🔁') || prevLog(...args);
+  const result = await fetchPagesWithSkip(URLS[name].url, URLS[name].token);
+  console.log = prevLog;
+  console.log(`📦 ${name}: ${result.length} items`);
+  return result;
 }
 
-testSync();
+const combineUnique = (a, b) =>
+  Array.from(new Map([...a, ...b].map(i => [i.ListingKey, i])).values());
+
+async function testSync() {
+  console.log('🧼 Clearing all tables');
+  const tables = [
+    'common_fields',
+    'residential_freehold',
+    'residential_condo',
+    'residential_lease',
+    'property_openhouse',
+    'property_media'
+  ];
+
+  await Promise.all(
+    tables.map(t => supabase.from(t).delete().neq('ListingKey', ''))
+  );
+
+  const [idxRaw, vowRaw] = await Promise.all([
+    fetchAndLog('IDX'),
+    fetchAndLog('VOW')
+  ]);
+
+  const freeholdRaw = combineUnique(
+    await fetchAndLog('Freehold'),
+    vowRaw.filter(i => i.PropertyType === 'Residential Freehold')
+  );
+  const condoRaw = combineUnique(
+    await fetchAndLog('Condo'),
+    vowRaw.filter(i => i.PropertyType === 'Residential Condo & Other')
+  );
+  const leaseRaw = combineUnique(
+    await fetchAndLog('Lease'),
+    vowRaw.filter(i => i.TransactionType === 'For Lease')
+  );
+
+  const openhouseRaw = (await fetchAndLog('OpenHouse')).filter(
+    o => o.OpenHouseKey && o.ListingKey
+  );
+
+  const allMediaRaw = await fetchAndLog('Media');
+  const mediaRaw = allMediaRaw.filter(
+    m => m.ResourceRecordKey && m.MediaKey
+  );(
+    m => m.ResourceRecordKey && m.MediaKey
+  );
+
+  const mediaRows = mediaRaw.map(i => ({
+    ListingKey: i.ResourceRecordKey,
+    MediaKey:   i.MediaKey,
+    MediaURL:   i.MediaURL,
+    ...mapPropertyMedia(i)
+  }));
+
+  const seen = new Set();
+  const dedupedMediaRows = mediaRows.filter(r => {
+    const key = `${r.ListingKey}-${r.MediaKey}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const idxMap = Object.fromEntries(idxRaw.map(i => [i.ListingKey, i]));
+  const vowMap = Object.fromEntries(vowRaw.map(i => [i.ListingKey, i]));
+
+  const commonMap = new Map();
+  idxRaw.forEach(item => commonMap.set(item.ListingKey, { idx: item, vow: {} }));
+  vowRaw.forEach(item => {
+    const e = commonMap.get(item.ListingKey) || { idx: {}, vow: {} };
+    e.vow = item;
+    commonMap.set(item.ListingKey, e);
+  });
+  const commonRows = Array.from(commonMap.entries()).map(
+    ([key, { idx, vow }]) => ({ ListingKey: key, ...mapCommonFields(idx, vow) })
+  );
+
+  const freeholdRows = freeholdRaw.map(item => ({
+    ListingKey: item.ListingKey,
+    ...mapResidentalFreehold(idxMap[item.ListingKey] || {}, vowMap[item.ListingKey] || {})
+  }));
+
+  const condoRows = condoRaw.map(item => ({
+    ListingKey: item.ListingKey,
+    ...mapResidentialCondo(item)
+  }));
+
+  const leaseRows = leaseRaw.map(item => ({
+    ListingKey: item.ListingKey,
+    ...mapResidentialLease(item)
+  }));
+
+  const openhouseRows = openhouseRaw.map(i => ({ ListingKey: i.ListingKey, ...mapPropertyOpenhouse(i) }));
+
+  const upsert = async (table, rows, conflict, filterFn = () => true) => {
+    const valid = rows.filter(filterFn);
+    console.log(`🧩 Upserting ${valid.length} into ${table}`);
+    const { error } = await supabase.from(table).upsert(valid, { onConflict: conflict });
+    if (error) console.error(`❌ ${table}:`, error.message);
+  };
+
+  await upsert('common_fields', commonRows, 'ListingKey', r => !!r.ListingKey);
+  await upsert('residential_freehold', freeholdRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
+  await upsert('residential_condo', condoRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
+  await upsert('residential_lease', leaseRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
+  await upsert('property_openhouse', openhouseRows, ['ListingKey','OpenHouseKey'], r => r.ListingKey && r.OpenHouseKey);
+  await upsert('property_media', dedupedMediaRows, ['ListingKey','MediaKey'], r => commonRows.some(c => c.ListingKey === r.ListingKey) && r.MediaKey);
+
+  console.log('✅ Sync complete');
+}
+
+await testSync();
