@@ -7,17 +7,19 @@ import { mapPropertyOpenhouse } from './mappers/mapPropertyOpenhouse.js';
 import { mapResidentialLease } from './mappers/mapResidentialLease.js';
 import { mapResidentialCondo } from './mappers/mapResidentialCondo.js';
 import { mapPropertyMedia } from './mappers/mapPropertyMedia.js';
+import { mapPropertyRooms } from './mappers/mapPropertyRooms.js';
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 const URLS = {
-  IDX:       { url: process.env.IDX_URL,   token: process.env.IDX_TOKEN },
-  VOW:       { url: process.env.VOW_URL,   token: process.env.VOW_TOKEN },
-  Freehold:  { url: process.env.FREEHOLD_URL, token: process.env.IDX_TOKEN },
-  Condo:     { url: process.env.CONDO_URL,   token: process.env.IDX_TOKEN },
-  Lease:     { url: process.env.LEASE_URL,   token: process.env.IDX_TOKEN },
-  OpenHouse: { url: process.env.OPENHOUSE_URL, token: process.env.IDX_TOKEN },
-  Media:     { url: process.env.MEDIA_URL,   token: process.env.IDX_TOKEN }
+  IDX:        { url: process.env.IDX_URL,       token: process.env.IDX_TOKEN },
+  VOW:        { url: process.env.VOW_URL,       token: process.env.VOW_TOKEN },
+  Freehold:   { url: process.env.FREEHOLD_URL,   token: process.env.IDX_TOKEN },
+  Condo:      { url: process.env.CONDO_URL,      token: process.env.IDX_TOKEN },
+  Lease:      { url: process.env.LEASE_URL,      token: process.env.IDX_TOKEN },
+  OpenHouse:  { url: process.env.OPENHOUSE_URL,  token: process.env.IDX_TOKEN },
+  Media:      { url: process.env.MEDIA_URL,      token: process.env.IDX_TOKEN },
+  Rooms:      { url: process.env.ROOMS_URL,      token: process.env.IDX_TOKEN } // New rooms endpoint
 };
 
 async function fetchAndLog(name) {
@@ -41,21 +43,25 @@ async function testSync() {
     'residential_condo',
     'residential_lease',
     'property_openhouse',
-    'property_media'
+    'property_media',
+    'property_rooms'
   ];
-
   await Promise.all(
     tables.map(t => supabase.from(t).delete().neq('ListingKey', ''))
   );
 
-  const [idxRaw, vowRaw] = await Promise.all([
+    const [idxRaw, vowRaw] = await Promise.all([
     fetchAndLog('IDX'),
     fetchAndLog('VOW')
   ]);
 
+  // Fetch room records from separate rooms endpoint
+  const roomsRaw = (await fetchAndLog('Rooms'))
+    .filter(r => r.RoomKey && r.ListingKey);
+
   const freeholdRaw = combineUnique(
     await fetchAndLog('Freehold'),
-    vowRaw.filter(i => i.PropertyType === 'Residential Freehold')
+    idxRaw.filter(i => i.PropertyType === 'Residential Freehold')
   );
   const condoRaw = combineUnique(
     await fetchAndLog('Condo'),
@@ -65,32 +71,21 @@ async function testSync() {
     await fetchAndLog('Lease'),
     vowRaw.filter(i => i.TransactionType === 'For Lease')
   );
-
-  const openhouseRaw = (await fetchAndLog('OpenHouse')).filter(
-    o => o.OpenHouseKey && o.ListingKey
-  );
-
+  const openhouseRaw = (await fetchAndLog('OpenHouse'))
+    .filter(o => o.OpenHouseKey && o.ListingKey);
   const allMediaRaw = await fetchAndLog('Media');
-  const mediaRaw = allMediaRaw.filter(
-    m => m.ResourceRecordKey && m.MediaKey
-  );(
-    m => m.ResourceRecordKey && m.MediaKey
+
+  const mediaRows = allMediaRaw
+    .filter(m => m.ResourceRecordKey && m.MediaKey)
+    .map(i => ({
+      ListingKey: i.ResourceRecordKey,
+      MediaKey:   i.MediaKey,
+      MediaURL:   i.MediaURL,
+      ...mapPropertyMedia(i)
+    }));
+  const dedupedMedia = Array.from(
+    new Map(mediaRows.map(r => [`${r.ListingKey}-${r.MediaKey}`, r])).values()
   );
-
-  const mediaRows = mediaRaw.map(i => ({
-    ListingKey: i.ResourceRecordKey,
-    MediaKey:   i.MediaKey,
-    MediaURL:   i.MediaURL,
-    ...mapPropertyMedia(i)
-  }));
-
-  const seen = new Set();
-  const dedupedMediaRows = mediaRows.filter(r => {
-    const key = `${r.ListingKey}-${r.MediaKey}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
 
   const idxMap = Object.fromEntries(idxRaw.map(i => [i.ListingKey, i]));
   const vowMap = Object.fromEntries(vowRaw.map(i => [i.ListingKey, i]));
@@ -98,9 +93,9 @@ async function testSync() {
   const commonMap = new Map();
   idxRaw.forEach(item => commonMap.set(item.ListingKey, { idx: item, vow: {} }));
   vowRaw.forEach(item => {
-    const e = commonMap.get(item.ListingKey) || { idx: {}, vow: {} };
-    e.vow = item;
-    commonMap.set(item.ListingKey, e);
+    const entry = commonMap.get(item.ListingKey) || { idx: {}, vow: {} };
+    entry.vow = item;
+    commonMap.set(item.ListingKey, entry);
   });
   const commonRows = Array.from(commonMap.entries()).map(
     ([key, { idx, vow }]) => ({ ListingKey: key, ...mapCommonFields(idx, vow) })
@@ -108,20 +103,25 @@ async function testSync() {
 
   const freeholdRows = freeholdRaw.map(item => ({
     ListingKey: item.ListingKey,
-    ...mapResidentalFreehold(idxMap[item.ListingKey] || {}, vowMap[item.ListingKey] || {})
+    ...mapResidentalFreehold(idxMap[item.ListingKey] ?? {}, idxMap[item.ListingKey] ?? {})
   }));
-
   const condoRows = condoRaw.map(item => ({
     ListingKey: item.ListingKey,
     ...mapResidentialCondo(item)
   }));
-
   const leaseRows = leaseRaw.map(item => ({
     ListingKey: item.ListingKey,
     ...mapResidentialLease(item)
   }));
-
-  const openhouseRows = openhouseRaw.map(i => ({ ListingKey: i.ListingKey, ...mapPropertyOpenhouse(i) }));
+  const openhouseRows = openhouseRaw.map(i => ({
+    ListingKey: i.ListingKey,
+    ...mapPropertyOpenhouse(i)
+  }));
+      const roomRows = roomsRaw.map(r => ({
+    ListingID:   r.ListingID,
+    ListingKey:  r.ListingKey,
+    ...mapPropertyRooms(r, {})
+  }));
 
   const upsert = async (table, rows, conflict, filterFn = () => true) => {
     const valid = rows.filter(filterFn);
@@ -131,11 +131,24 @@ async function testSync() {
   };
 
   await upsert('common_fields', commonRows, 'ListingKey', r => !!r.ListingKey);
-  await upsert('residential_freehold', freeholdRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
-  await upsert('residential_condo', condoRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
-  await upsert('residential_lease', leaseRows, 'ListingKey', row => commonRows.some(c => c.ListingKey === row.ListingKey));
-  await upsert('property_openhouse', openhouseRows, ['ListingKey','OpenHouseKey'], r => r.ListingKey && r.OpenHouseKey);
-  await upsert('property_media', dedupedMediaRows, ['ListingKey','MediaKey'], r => commonRows.some(c => c.ListingKey === r.ListingKey) && r.MediaKey);
+  await upsert('residential_freehold', freeholdRows, 'ListingKey', row =>
+    commonRows.some(c => c.ListingKey === row.ListingKey)
+  );
+  await upsert('residential_condo', condoRows, 'ListingKey', row =>
+    commonRows.some(c => c.ListingKey === row.ListingKey)
+  );
+  await upsert('residential_lease', leaseRows, 'ListingKey', row =>
+    commonRows.some(c => c.ListingKey === row.ListingKey)
+  );
+  await upsert('property_openhouse', openhouseRows, ['ListingKey','OpenHouseKey'], r =>
+    r.ListingKey && r.OpenHouseKey
+  );
+  await upsert('property_media', dedupedMedia, ['ListingKey','MediaKey'], r =>
+    commonRows.some(c => c.ListingKey === r.ListingKey) && r.MediaKey
+  );
+    await upsert('property_rooms', roomRows, 'RoomKey', r =>
+    r.RoomKey
+  );
 
   console.log('✅ Sync complete');
 }

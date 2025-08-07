@@ -5,7 +5,6 @@ export function mapResidentialLease(idx = {}, vow = {}) {
     ListingKey: vow.ListingKey || idx.ListingKey,
     Furnished: extractSingleFromArrayString(vow.Furnished || idx.Furnished),
     RentIncludes: vow.RentIncludes || idx.RentIncludes || [],
-    LeasedTerms: vow.LeasedTerms || idx.LeasedTerms || null,
   };
 }
 
