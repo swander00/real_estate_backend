@@ -1,53 +1,71 @@
-/**
- * Map IDX and VOW feeds into the property_rooms table structure
- * Without helper functions
- */
-export function mapPropertyRooms(idx = {}, vow = {}) {
-  // Pull ListingID directly
-  const ListingID = idx.ListingID ?? idx.ListingKey ?? null;
-  const ListingKey = idx.ListingKey ?? vow.ListingKey ?? null;
-  const ModificationTimestamp = idx.ModificationTimestamp ?? vow.ModificationTimestamp ?? null;
-  const Order = idx.Order ?? vow.Order ?? null;
+// mappers/mapPropertyRooms.js
 
-  // Value getters
-  const getValue = field => (vow[field] !== undefined && vow[field] !== null)
-    ? vow[field]
-    : (idx[field] !== undefined ? idx[field] : null);
+export function mapPropertyRooms(idx) {
+  const clean = (v) =>
+    v === undefined || v === null
+      ? null
+      : Array.isArray(v)
+      ? (v.length ? String(v[0]).trim() : null)
+      : String(v).trim();
 
-  // Extract first element if array, or return string
-  const single = value => Array.isArray(value)
-    ? (value.length ? value[0] : null)
-    : (typeof value === 'string' ? value : null);
+  const cleanArray = (v) => {
+    if (!v) return null;
+    if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+    return String(v)
+      .split(/[|;,/]/g)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  };
 
-  // Ensure arrays for multi-select
-  const multi = value => Array.isArray(value) ? value : null;
+  const cleanNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const cleanInt = (v) => {
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const cleanDate = (v) => {
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  };
+
+  // Required fields
+  const RoomKey = clean(idx.RoomKey);
+  const ListingKey = clean(idx.ListingKey);
+  let Order = cleanInt(idx.Order);
+
+  // Fallback for missing Order
+  if (Order === null && RoomKey) {
+    let hash = 0;
+    for (let i = 0; i < RoomKey.length; i++) {
+      hash = (hash * 31 + RoomKey.charCodeAt(i)) | 0;
+    }
+    Order = Math.abs(hash % 1000) + 1000;
+  }
 
   return {
-    ListingID,
+    RoomKey,
     ListingKey,
-    ModificationTimestamp,
+    ModificationTimestamp: cleanDate(idx.ModificationTimestamp),
     Order,
-
-    RoomArea:               getValue('RoomArea'),
-    RoomAreaSource:         single(getValue('RoomAreaSource')),
-    RoomAreaUnits:          single(getValue('RoomAreaUnits')),
-
-    RoomDescription:        getValue('RoomDescription'),
-    RoomDimensions:         getValue('RoomDimensions'),
-
-    RoomFeature1:           single(getValue('RoomFeature1')),
-    RoomFeature2:           single(getValue('RoomFeature2')),
-    RoomFeature3:           single(getValue('RoomFeature3')),
-    RoomFeatures:           multi(getValue('RoomFeatures')),
-
-    RoomKey:                getValue('RoomKey'),
-    RoomLength:             getValue('RoomLength'),
-    RoomLengthWidthSource:  single(getValue('RoomLengthWidthSource')),
-    RoomLengthWidthUnits:   single(getValue('RoomLengthWidthUnits')),
-
-    RoomLevel:              single(getValue('RoomLevel')),
-    RoomStatus:             single(getValue('RoomStatus')),
-    RoomType:               single(getValue('RoomType')),
-    RoomWidth:              getValue('RoomWidth')
+    RoomType: clean(idx.RoomType),
+    RoomLevel: clean(idx.RoomLevel),
+    RoomDimensions: clean(idx.RoomDimensions),
+    RoomFeature1: clean(idx.RoomFeature1),
+    RoomFeature2: clean(idx.RoomFeature2),
+    RoomFeature3: clean(idx.RoomFeature3),
+    RoomFeatures: cleanArray(idx.RoomFeatures),
+    RoomDescription: clean(idx.RoomDescription),
+    RoomArea: cleanNum(idx.RoomArea),
+    RoomAreaSource: clean(idx.RoomAreaSource),
+    RoomAreaUnits: clean(idx.RoomAreaUnits),
+    RoomLength: cleanNum(idx.RoomLength),
+    RoomLengthWidthSource: clean(idx.RoomLengthWidthSource),
+    RoomLengthWidthUnits: clean(idx.RoomLengthWidthUnits),
+    RoomStatus: clean(idx.RoomStatus),
+    RoomWidth: cleanNum(idx.RoomWidth),
   };
 }
