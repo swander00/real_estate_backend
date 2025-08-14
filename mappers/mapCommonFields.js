@@ -1,14 +1,11 @@
 // mappers/mapCommonFields.js
-
 import { extractSingleFromArrayString, capitalizeWords, normalizeCityName } from '../lib/utils.js';
 
-// helper aliases for clarity
 const cleanArray    = extractSingleFromArrayString;
 const capitalize    = capitalizeWords;
 const normalizeCity = normalizeCityName;
 
 export function mapCommonFields(idx = {}, vow = {}) {
-  // simple getter with VOW → IDX fallback
   const get = field => (vow[field] ?? idx[field] ?? null);
 
   return {
@@ -49,7 +46,7 @@ export function mapCommonFields(idx = {}, vow = {}) {
 
     OriginalEntryTimestamp:            get('OriginalEntryTimestamp'),
     SoldConditionalEntryTimestamp:     get('SoldConditionalEntryTimestamp'),
-    SoldEntryTimestamp:                get('SoldEntryTimestamp'),
+    SoldEntryTimestamp:                 get('SoldEntryTimestamp'),
     SuspendedEntryTimestamp:           get('SuspendedEntryTimestamp'),
     TerminatedEntryTimestamp:          get('TerminatedEntryTimestamp'),
     CloseDate:                         get('CloseDate'),
@@ -74,7 +71,6 @@ export function mapCommonFields(idx = {}, vow = {}) {
     CoveredSpaces:                     get('CoveredSpaces'),
     WaterfrontYN:                      get('WaterfrontYN'),
     BedroomsBelowGrade:                get('BedroomsBelowGrade'),
-    CoveredSpaces:           		   get('CoveredSpaces'),
     KitchensBelowGrade:                get('KitchensBelowGrade'),
     KitchensTotal:                     get('KitchensTotal'),
     LotSizeRangeAcres:                 get('LotSizeRangeAcres'),
@@ -86,4 +82,21 @@ export function mapCommonFields(idx = {}, vow = {}) {
 
     ParkingTotal:                      get('ParkingTotal')
   };
+}
+
+export async function upsertCommonFields(supabase, records) {
+  // Map all records first
+  const mapped = records.map(record => mapCommonFields(record, {}));
+
+  // Upsert into your "common_fields" or "property" table
+  const { data, error } = await supabase
+    .from('property') // change to your actual table name
+    .upsert(mapped, { onConflict: 'ListingKey' });
+
+  if (error) {
+    console.error('❌ Error upserting common fields:', error);
+    throw error;
+  } else {
+    console.log(`✅ Upserted ${mapped.length} common field records`);
+  }
 }

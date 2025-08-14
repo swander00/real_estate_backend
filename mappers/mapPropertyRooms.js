@@ -1,6 +1,5 @@
 // mappers/mapPropertyRooms.js
-
-export function mapPropertyRooms(idx) {
+export function mapPropertyRooms(idx = {}) {
   const clean = (v) =>
     v === undefined || v === null
       ? null
@@ -29,7 +28,7 @@ export function mapPropertyRooms(idx) {
 
   const cleanDate = (v) => {
     const d = new Date(v);
-    return isNaN(d.getTime()) ? null : d.toISOString();
+    return Number.isFinite(d.getTime()) ? d.toISOString() : null;
   };
 
   // Required fields
@@ -37,18 +36,17 @@ export function mapPropertyRooms(idx) {
   const ListingKey = clean(idx.ListingKey);
   let Order = cleanInt(idx.Order);
 
-  // Fallback for missing Order
+  // Fallback for missing Order (stable hash of RoomKey)
   if (Order === null && RoomKey) {
     let hash = 0;
-    for (let i = 0; i < RoomKey.length; i++) {
-      hash = (hash * 31 + RoomKey.charCodeAt(i)) | 0;
-    }
+    for (let i = 0; i < RoomKey.length; i++) hash = (hash * 31 + RoomKey.charCodeAt(i)) | 0;
     Order = Math.abs(hash % 1000) + 1000;
   }
 
   return {
     RoomKey,
     ListingKey,
+    SystemModificationTimestamp: cleanDate(idx.SystemModificationTimestamp ?? idx.ModificationTimestamp),
     ModificationTimestamp: cleanDate(idx.ModificationTimestamp),
     Order,
     RoomType: clean(idx.RoomType),
@@ -68,4 +66,25 @@ export function mapPropertyRooms(idx) {
     RoomStatus: clean(idx.RoomStatus),
     RoomWidth: cleanNum(idx.RoomWidth),
   };
+}
+
+/**
+ * Upserts room records into the property_rooms table.
+ * 
+ * @param {object} supabase - Supabase client
+ * @param {Array<object>} records - Raw feed records
+ */
+export async function upsertRooms(supabase, records) {
+  const mapped = records.map(record => mapPropertyRooms(record));
+
+  const { data, error } = await supabase
+    .from('property_rooms') // <-- replace with your actual rooms table name
+    .upsert(mapped, { onConflict: 'RoomKey' });
+
+  if (error) {
+    console.error('❌ Error upserting room records:', error);
+    throw error;
+  } else {
+    console.log(`✅ Upserted ${mapped.length} room records`);
+  }
 }
