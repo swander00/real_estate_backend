@@ -2,50 +2,59 @@
 
 /**
  * Maps raw IDX and VOW media feed items into the property_media table schema.
- * Ensures SystemModificationTimestamp is included and ResourceRecordKey is used
- * as the unique link to the related listing.
+ * Handles composite primary key (ResourceRecordKey, MediaKey) and proper timestamp formatting.
  */
 export function mapPropertyMedia(idxItem = {}, vowItem = {}) {
   const get = (field) => idxItem[field] ?? vowItem[field] ?? null;
 
+  const cleanTimestamp = (v) => {
+    if (!v) return null;
+    const d = new Date(v);
+    return Number.isFinite(d.getTime()) ? d.toISOString() : null;
+  };
+
+  const cleanInt = (v) => {
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const cleanBoolean = (v) => {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'boolean') return v;
+    const str = String(v).toLowerCase().trim();
+    return str === 'true' || str === '1' || str === 'yes';
+  };
+
   return {
-    ImageOf:                     get('ImageOf'),
-    ImageSizeDescription:        get('ImageSizeDescription'),
-    MediaCategory:               get('MediaCategory'),
-    MediaKey:                     get('MediaKey'),
-    MediaModificationTimestamp:   get('MediaModificationTimestamp'),
+    // Primary key components (both required)
+    ResourceRecordKey:            get('ResourceRecordKey'),  // Links to ListingKey
+    MediaKey:                     get('MediaKey'),           // Unique media identifier
+    
+    // Foreign key (redundant but required by your schema)
+    ListingKey:                   get('ResourceRecordKey'), // Same as ResourceRecordKey
+    
+    // Media details
+    ImageOf:                      get('ImageOf'),
+    ImageSizeDescription:         get('ImageSizeDescription'),
+    MediaCategory:                get('MediaCategory'),
     MediaObjectID:                get('MediaObjectID'),
     MediaStatus:                  get('MediaStatus'),
     MediaType:                    get('MediaType'),
     MediaURL:                     get('MediaURL'),
-    ModificationTimestamp:        get('ModificationTimestamp'),
-    SystemModificationTimestamp:  get('SystemModificationTimestamp'),
-    Order:                        get('Order'),
-    OriginatingSystemID:          get('OriginatingSystemID'),
-    PreferredPhotoYN:             get('PreferredPhotoYN'),
+    ShortDescription:             get('ShortDescription'),
     ResourceName:                 get('ResourceName'),
-    ResourceRecordKey:            get('ResourceRecordKey'), // Must match DB unique constraint
-    ShortDescription:             get('ShortDescription')
+    OriginatingSystemID:          get('OriginatingSystemID'),
+    
+    // Numeric fields
+    Order:                        cleanInt(get('Order')),
+    
+    // Boolean fields
+    PreferredPhotoYN:             cleanBoolean(get('PreferredPhotoYN')),
+    
+    // Timestamp fields
+    MediaModificationTimestamp:   cleanTimestamp(get('MediaModificationTimestamp')),
+    ModificationTimestamp:        cleanTimestamp(get('ModificationTimestamp')),
+    SystemModificationTimestamp:  cleanTimestamp(get('SystemModificationTimestamp')),
+    OriginalEntryTimestamp:       cleanTimestamp(get('OriginalEntryTimestamp'))
   };
-}
-
-/**
- * Upserts media records into the property_media table.
- * 
- * @param {object} supabase - Supabase client
- * @param {Array<object>} records - Raw feed records
- */
-export async function upsertMedia(supabase, records) {
-  const mapped = records.map(record => mapPropertyMedia(record, {}));
-
-  const { data, error } = await supabase
-    .from('property_media') // <-- replace with your actual media table name if different
-    .upsert(mapped, { onConflict: 'ResourceRecordKey' });
-
-  if (error) {
-    console.error('❌ Error upserting media:', error);
-    throw error;
-  } else {
-    console.log(`✅ Upserted ${mapped.length} media records`);
-  }
 }
