@@ -1,5 +1,5 @@
 // api/sync-idx.js - Cron endpoint for IDX sync
-import { syncListingsIdx } from '../syncListingsIdx.js';
+import { syncListingsIdx } from '../lib/syncListingsIdx.js';
 
 export default async function handler(req, res) {
   // Verify cron authorization

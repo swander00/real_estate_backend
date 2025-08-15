@@ -1,5 +1,5 @@
 // api/sync-vow.js - Cron endpoint for VOW sync
-import { syncListingsVow } from '../syncListingsVow.js';
+import { syncListingsVow } from '../lib/syncListingsVow.js';
 
 export default async function handler(req, res) {
   // Verify cron authorization

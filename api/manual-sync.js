@@ -1,6 +1,6 @@
 // api/manual-sync.js - Manual sync endpoint for testing/debugging
-import { syncListingsIdx } from '../syncListingsIdx.js';
-import { syncListingsVow } from '../syncListingsVow.js';
+import { syncListingsIdx } from '../lib/syncListingsIdx.js';
+import { syncListingsVow } from '../lib/syncListingsVow.js';
 
 export default async function handler(req, res) {
   // Only allow GET requests
