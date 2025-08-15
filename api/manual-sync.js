@@ -75,9 +75,3 @@ export default async function handler(req, res) {
     });
   }
 }
-
-// Usage examples:
-// GET /api/manual-sync?type=idx&mode=incremental
-// GET /api/manual-sync?type=vow&mode=test
-// GET /api/manual-sync?type=both
-// GET /api/manual-sync?type=idx
