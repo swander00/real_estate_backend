@@ -370,9 +370,5 @@ const formatODataDate = (date) => {
   return `datetime'${isoString}'`;
 };
 
-// Check if running in different modes (for direct execution)
-if (process.argv[1] && process.argv[1].includes('syncListingsIdx.js')) {
-  const testMode = process.argv.includes('--test');
-  const incrementalMode = process.argv.includes('--incremental');
-  await syncListingsIdx(testMode, incrementalMode);
-}
+// REMOVED: The problematic execution block that was causing imports to fail
+// This file is now purely for exports and can be safely imported by API endpoints
