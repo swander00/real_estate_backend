@@ -266,8 +266,5 @@ function getTestLimit(tableName) {
   return limits[tableName] || 5000;
 }
 
-// Check if running in test mode (for direct execution)
-if (process.argv[1] && process.argv[1].includes('syncListingsVow.js')) {
-  const testMode = process.argv.includes('--test');
-  await syncListingsVow(testMode);
-}
+// REMOVED: The problematic execution block that was causing imports to fail
+// This file is now purely for exports and can be safely imported by API endpoints
