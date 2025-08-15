@@ -94,6 +94,47 @@ const TABLES = [
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size));
 
+// Sync state management functions
+async function getSyncState(key) {
+  try {
+    const { data, error } = await supabase
+      .from('sync_state')
+      .select('last_sync')
+      .eq('sync_key', key)
+      .single();
+    
+    if (error || !data) {
+      console.log(`📅 No previous sync state found for ${key}, using fallback`);
+      return null;
+    }
+    
+    return new Date(data.last_sync);
+  } catch (error) {
+    console.error('Error getting sync state:', error);
+    return null;
+  }
+}
+
+async function updateSyncState(key, timestamp) {
+  try {
+    const { error } = await supabase
+      .from('sync_state')
+      .upsert({
+        sync_key: key,
+        last_sync: timestamp.toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'sync_key'
+      });
+    
+    if (error) throw error;
+    console.log(`📝 Updated sync state for ${key}: ${timestamp.toISOString()}`);
+  } catch (error) {
+    console.error('Error updating sync state:', error);
+    throw error;
+  }
+}
+
 async function upsertWithRetry(table, rows, conflict) {
   let attempt = 0;
   while (true) {
@@ -220,7 +261,7 @@ async function fetchAndProcessBatch(tableConfig, state, testMode, dateFilter = n
   }
 }
 
-async function syncListingsIdx(testMode = false, incrementalMode = false) {
+export async function syncListingsIdx(testMode = false, incrementalMode = false) {
   const syncType = incrementalMode ? 'incremental' : testMode ? 'test' : 'full';
   console.log(`🚀 Starting IDX sync (${syncType} mode) - Round Robin`);
   
@@ -329,7 +370,9 @@ const formatODataDate = (date) => {
   return `datetime'${isoString}'`;
 };
 
-// Check if running in different modes
-const testMode = process.argv.includes('--test');
-const incrementalMode = process.argv.includes('--incremental');
-await syncListingsIdx(testMode, incrementalMode);
+// Check if running in different modes (for direct execution)
+if (process.argv[1] && process.argv[1].includes('syncListingsIdx.js')) {
+  const testMode = process.argv.includes('--test');
+  const incrementalMode = process.argv.includes('--incremental');
+  await syncListingsIdx(testMode, incrementalMode);
+}

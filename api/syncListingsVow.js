@@ -189,7 +189,7 @@ async function fetchAndProcessBatch(tableConfig, state, testMode) {
   }
 }
 
-async function syncListingsVow(testMode = false) {
+export async function syncListingsVow(testMode = false) {
   console.log(`🚀 Starting VOW sync${testMode ? ' (test mode)' : ''} - Round Robin (Sold/Historical)`);
   
   // Initialize state for each table
@@ -266,6 +266,8 @@ function getTestLimit(tableName) {
   return limits[tableName] || 5000;
 }
 
-// Check if running in test mode
-const testMode = process.argv.includes('--test');
-await syncListingsVow(testMode);
+// Check if running in test mode (for direct execution)
+if (process.argv[1] && process.argv[1].includes('syncListingsVow.js')) {
+  const testMode = process.argv.includes('--test');
+  await syncListingsVow(testMode);
+}

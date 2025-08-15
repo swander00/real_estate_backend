@@ -1,3 +1,14 @@
+
 {
-  "version": 2
+  "version": 2,
+  "crons": [
+    {
+      "path": "/api/sync-idx",
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/sync-vow", 
+      "schedule": "30 */2 * * *"
+    }
+  ]
 }
