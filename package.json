@@ -16,7 +16,9 @@
   "author": "Your Name",
   "license": "MIT",
   "scripts": {
-    "dev": "vercel dev",
+    "start": "node server.js",
+    "dev": "vercel dev --listen 3000",
+    "dev:local": "node server.js",
     "deploy": "vercel --prod",
     "test": "node --test",
     "test-sync": "node lib/syncListingsIdx.js --test",
@@ -31,12 +33,14 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.42.0",
-    "dotenv": "^16.4.0"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
-    "prettier": "^3.0.0",
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0",
+    "prettier": "^3.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -51,12 +55,16 @@
       "web_api": true,
       "metadata": true,
       "odata_queries": true,
-      "standard_resources": ["Property", "Media", "OpenHouse"],
+      "standard_resources": [
+        "Property",
+        "Media",
+        "OpenHouse"
+      ],
       "validation": true
     },
     "endpoints": {
       "root": "/api/reso",
-      "metadata": "/api/reso/$metadata", 
+      "metadata": "/api/reso/$metadata",
       "property": "/api/reso/Property",
       "media": "/api/reso/Media",
       "openhouse": "/api/reso/OpenHouse"

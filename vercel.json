@@ -1,3 +1,23 @@
 {
-  "version": 2
+  "version": 2,
+  "builds": [
+    { "src": "api/index.js", "use": "@vercel/node" },
+    { "src": "api/manual-sync.js", "use": "@vercel/node" },
+    { "src": "api/sync-idx.js", "use": "@vercel/node" },
+    { "src": "api/sync-vow.js", "use": "@vercel/node" },
+    { "src": "api/health.js", "use": "@vercel/node" },
+    { "src": "api/debug.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/reso/(.*)", "dest": "/api/index.js" },
+    { "src": "/api/sync-manual", "dest": "/api/manual-sync.js" },
+    { "src": "/api/sync-idx", "dest": "/api/sync-idx.js" },
+    { "src": "/api/sync-vow", "dest": "/api/sync-vow.js" },
+    { "src": "/api/health", "dest": "/api/health.js" },
+    { "src": "/api/debug", "dest": "/api/debug.js" },
+    { "src": "/api/(.*)", "dest": "/api/index.js" }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
