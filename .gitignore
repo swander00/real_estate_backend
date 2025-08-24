@@ -39,3 +39,6 @@ coverage/
 /pnpm-lock.yaml
 "@ | Out-File -FilePath .gitignore -Encoding UTF8
 .vercel
+.env 
+node_modules/ 
+.vercel 
