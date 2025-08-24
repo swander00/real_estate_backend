@@ -1,1 +1,40 @@
-.vercel
+# Create a new .gitignore file with proper content
+@"
+# dependencies
+/node_modules/
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# build output
+/dist/
+/build/
+/out/
+
+# Vercel
+.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+
+# coverage
+coverage/
+.nyc_output/
+
+# lockfiles (if you ever switch managers)
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+"@ | Out-File -FilePath .gitignore -Encoding UTF8
