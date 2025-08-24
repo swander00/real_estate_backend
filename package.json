@@ -1,14 +1,65 @@
 {
   "name": "real-estate-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "RESO Web API 2.0.0 compliant real estate backend with advanced MLS data synchronization",
   "type": "module",
+  "keywords": [
+    "real-estate",
+    "reso",
+    "mls",
+    "property-data",
+    "odata",
+    "web-api",
+    "supabase",
+    "vercel"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "scripts": {
     "dev": "vercel dev",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "test": "node --test",
+    "test-sync": "node lib/syncListingsIdx.js --test",
+    "test-vow": "node lib/syncListingsVow.js --test",
+    "full-sync": "node lib/syncListingsIdx.js",
+    "incremental-sync": "node lib/syncListingsIdx.js --incremental",
+    "check-env": "node api/test-env-local.js",
+    "validate-reso": "node scripts/validateResoCompliance.js",
+    "lint": "eslint api/ lib/ mappers/",
+    "format": "prettier --write api/ lib/ mappers/",
+    "docs": "node scripts/generateApiDocs.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.42.0",
-    "dotenv": "^16.4.0",
-    "node-fetch": "^3.3.2"
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swander00/real_estate_backend.git"
+  },
+  "reso": {
+    "version": "2.0.0",
+    "compliance": {
+      "web_api": true,
+      "metadata": true,
+      "odata_queries": true,
+      "standard_resources": ["Property", "Media", "OpenHouse"],
+      "validation": true
+    },
+    "endpoints": {
+      "root": "/api/reso",
+      "metadata": "/api/reso/$metadata", 
+      "property": "/api/reso/Property",
+      "media": "/api/reso/Media",
+      "openhouse": "/api/reso/OpenHouse"
+    }
   }
 }
