@@ -31,9 +31,14 @@ export function mapPropertyRooms(idx = {}) {
     return Number.isFinite(d.getTime()) ? d.toISOString() : null;
   };
 
-  // Required fields
+  // Required fields - handle multiple RESO patterns
   const RoomKey = clean(idx.RoomKey);
-  const ListingKey = clean(idx.ListingKey);
+  // Try multiple field patterns for ListingKey
+  const ListingKey = clean(idx.ListingKey) || 
+                    clean(idx.ResourceRecordKey) || 
+                    clean(idx.PropertyKey) ||
+                    clean(idx.ListingId);
+  
   let Order = cleanInt(idx.Order);
 
   // Fallback for missing Order (stable hash of RoomKey)
@@ -45,7 +50,7 @@ export function mapPropertyRooms(idx = {}) {
 
   return {
     RoomKey,
-    ListingKey,
+    ListingKey, // This will use the fallback logic above
     SystemModificationTimestamp: cleanDate(idx.SystemModificationTimestamp ?? idx.ModificationTimestamp),
     ModificationTimestamp: cleanDate(idx.ModificationTimestamp),
     Order,
@@ -78,7 +83,7 @@ export async function upsertRooms(supabase, records) {
   const mapped = records.map(record => mapPropertyRooms(record));
 
   const { data, error } = await supabase
-    .from('property_rooms') // <-- replace with your actual rooms table name
+    .from('property_rooms')
     .upsert(mapped, { onConflict: 'RoomKey' });
 
   if (error) {
