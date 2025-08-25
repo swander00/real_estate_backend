@@ -1,115 +1,63 @@
 // mappers/mapCommonFields.js
 // Maps and normalizes common fields from IDX and VOW data sources for real estate listings
 
-/**
- * Extracts the first element from an array or returns the value if it's not an array
- * Used for fields that come as arrays but should be stored as single values
- * @param {any} value - The value to process
- * @returns {any|null} - Single value or null
- */
-const extractSingleFromArrayString = (value) => {
-  if (!value) return null;
-  return Array.isArray(value) && value.length > 0 ? value[0] : value;
-};
+import {
+  cleanSingleValue,
+  cleanArrayValue,
+  capitalizeWords,
+  normalizeCityName,
+  cleanTimestamp
+} from './mapperHelpers.js';
 
 /**
- * Ensures a value is properly formatted as an array for PostgreSQL array fields
- * Handles various input formats: strings, arrays, comma-separated values
- * @param {any} value - The value to convert to array format
- * @returns {Array|null} - Array of values or null
- */
-const ensureArray = (value) => {
-  if (!value) return null;
-  
-  // If already an array, return as-is
-  if (Array.isArray(value)) return value;
-  
-  // If it's a string, handle comma-separated values or single values
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (trimmed === '') return null;
-    
-    // Check if it contains commas (comma-separated list)
-    if (trimmed.includes(',')) {
-      return trimmed.split(',').map(s => s.trim()).filter(s => s !== '');
-    }
-    
-    // Single string value, wrap in array
-    return [trimmed];
-  }
-  
-  // For other types (numbers, booleans, etc.), wrap in array
-  return [value];
-};
-
-/**
- * Capitalizes the first letter of each word in a string
- * @param {string} str - String to capitalize
- * @returns {string|null} - Capitalized string or null
- */
-const capitalizeWords = (str) => {
-  if (!str) return null;
-  return String(str).replace(/\w\S*/g, (txt) => 
-    txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-  );
-};
-
-/**
- * Normalizes city names by trimming whitespace and capitalizing properly
- * @param {string} city - City name to normalize
- * @returns {string|null} - Normalized city name or null
- */
-const normalizeCityName = (city) => {
-  if (!city) return null;
-  return capitalizeWords(String(city).trim());
-};
-
-// Legacy aliases for backward compatibility
-const cleanArray = extractSingleFromArrayString;
-const capitalize = capitalizeWords;
-const normalizeCity = normalizeCityName;
-
-/**
- * Maps common fields from IDX and VOW data sources into a standardized format
- * Prioritizes VOW data over IDX data when both are available
- * 
- * @param {Object} idx - IDX data object (public listings)
- * @param {Object} vow - VOW data object (sold/off-market listings)
- * @returns {Object} - Mapped common fields object
+ * Maps common fields from IDX and VOW data sources
+ * Updated to use comprehensive helper functions for better data cleaning
  */
 export function mapCommonFields(idx = {}, vow = {}) {
-  // Helper function to get field value, preferring VOW over IDX
   const get = field => (vow[field] ?? idx[field] ?? null);
 
   return {
-    // Primary identifiers and pricing
+    // =========================================================================
+    // PRIMARY IDENTIFIERS AND PRICING
+    // =========================================================================
     ListingKey:                        get('ListingKey'),
     ListPrice:                         get('ListPrice'),
     ClosePrice:                        get('ClosePrice'),
 
-    // Status fields
+    // =========================================================================
+    // STATUS FIELDS
+    // =========================================================================
     MlsStatus:                         get('MlsStatus'),
     ContractStatus:                    get('ContractStatus'),
     StandardStatus:                    get('StandardStatus'),
     TransactionType:                   get('TransactionType'),
 
-    // Property type and style
+    // =========================================================================
+    // PROPERTY TYPE AND STYLE
+    // =========================================================================
     PropertyType:                      get('PropertyType'),
     PropertySubType:                   get('PropertySubType'),
-    ArchitecturalStyle:                ensureArray(get('ArchitecturalStyle')), // Array field
+    
+    // ArchitecturalStyle: Usually single value like "2-Storey", "Apartment"
+    // Clean as single value, not array
+    ArchitecturalStyle:                cleanSingleValue(get('ArchitecturalStyle')),
 
-    // Address fields
-    UnparsedAddress:                   capitalize(get('UnparsedAddress')),
+    // =========================================================================
+    // ADDRESS FIELDS
+    // =========================================================================
+    UnparsedAddress:                   capitalizeWords(get('UnparsedAddress')),
     StreetNumber:                      get('StreetNumber'),
-    StreetName:                        capitalize(get('StreetName')),
+    StreetName:                        capitalizeWords(get('StreetName')),
     StreetSuffix:                      get('StreetSuffix'),
-    City:                              normalizeCity(get('City')),
+    City:                              normalizeCityName(get('City')),
     StateOrProvince:                   get('StateOrProvince'),
     PostalCode:                        get('PostalCode'),
     CountyOrParish:                    get('CountyOrParish'),
     CityRegion:                        get('CityRegion'),
 
-    // Room counts
+    // =========================================================================
+    // ROOM COUNTS (keeping original values as-is)
+    // =========================================================================
     KitchensAboveGrade:                get('KitchensAboveGrade'),
     BedroomsAboveGrade:                get('BedroomsAboveGrade'),
     BathroomsTotalInteger:             get('BathroomsTotalInteger'),
@@ -118,41 +66,71 @@ export function mapCommonFields(idx = {}, vow = {}) {
     KitchensTotal:                     get('KitchensTotal'),
     DenFamilyRoomYN:                   get('DenFamilyRoomYN'),
 
-    // Descriptions and remarks
-    PublicRemarks:                     capitalize(get('PublicRemarks')),
-    PossessionDetails:                 capitalize(get('PossessionDetails')),
+    // =========================================================================
+    // DESCRIPTIONS AND REMARKS
+    // =========================================================================
+    PublicRemarks:                     capitalizeWords(get('PublicRemarks')),
+    PossessionDetails:                 capitalizeWords(get('PossessionDetails')),
 
-    // Timestamp fields for tracking changes
-    PhotosChangeTimestamp:             get('PhotosChangeTimestamp'),
-    MediaChangeTimestamp:              get('MediaChangeTimestamp'),
-    ModificationTimestamp:             get('ModificationTimestamp'),
-    SystemModificationTimestamp:       get('SystemModificationTimestamp'),
-    OriginalEntryTimestamp:            get('OriginalEntryTimestamp'),
+    // =========================================================================
+    // TIMESTAMP FIELDS
+    // =========================================================================
+    PhotosChangeTimestamp:             cleanTimestamp(get('PhotosChangeTimestamp')),
+    MediaChangeTimestamp:              cleanTimestamp(get('MediaChangeTimestamp')),
+    ModificationTimestamp:             cleanTimestamp(get('ModificationTimestamp')),
+    SystemModificationTimestamp:       cleanTimestamp(get('SystemModificationTimestamp')),
+    OriginalEntryTimestamp:            cleanTimestamp(get('OriginalEntryTimestamp')),
 
     // Status change timestamps
-    SoldConditionalEntryTimestamp:     get('SoldConditionalEntryTimestamp'),
-    SoldEntryTimestamp:                get('SoldEntryTimestamp'),
-    SuspendedEntryTimestamp:           get('SuspendedEntryTimestamp'),
-    TerminatedEntryTimestamp:          get('TerminatedEntryTimestamp'),
+    SoldConditionalEntryTimestamp:     cleanTimestamp(get('SoldConditionalEntryTimestamp')),
+    SoldEntryTimestamp:                cleanTimestamp(get('SoldEntryTimestamp')),
+    SuspendedEntryTimestamp:           cleanTimestamp(get('SuspendedEntryTimestamp')),
+    TerminatedEntryTimestamp:          cleanTimestamp(get('TerminatedEntryTimestamp')),
 
-    // Important dates
-    CloseDate:                         get('CloseDate'),
-    ConditionalExpiryDate:             get('ConditionalExpiryDate'),
-    PurchaseContractDate:              get('PurchaseContractDate'),
-    SuspendedDate:                     get('SuspendedDate'),
-    TerminatedDate:                    get('TerminatedDate'),
-    UnavailableDate:                   get('UnavailableDate'),
+    // =========================================================================
+    // IMPORTANT DATES
+    // =========================================================================
+    CloseDate:                         cleanTimestamp(get('CloseDate')),
+    ConditionalExpiryDate:             cleanTimestamp(get('ConditionalExpiryDate')),
+    PurchaseContractDate:              cleanTimestamp(get('PurchaseContractDate')),
+    SuspendedDate:                     cleanTimestamp(get('SuspendedDate')),
+    TerminatedDate:                    cleanTimestamp(get('TerminatedDate')),
+    UnavailableDate:                   cleanTimestamp(get('UnavailableDate')),
 
-    // Property features and amenities (Array fields - these can contain multiple values)
-    Cooling:                           ensureArray(get('Cooling')),
-    Basement:                          ensureArray(get('Basement')), // This was causing the error
-    ExteriorFeatures:                  ensureArray(get('ExteriorFeatures')),
-    InteriorFeatures:                  ensureArray(get('InteriorFeatures')),
-    PoolFeatures:                      ensureArray(get('PoolFeatures')),
-    PropertyFeatures:                  ensureArray(get('PropertyFeatures')),
-    Sewer:                             ensureArray(get('Sewer')),
+    // =========================================================================
+    // PROPERTY FEATURES - SINGLE VALUES (stored as text)
+    // =========================================================================
+    // These often come as arrays but should be stored as single values
+    
+    // Cooling: Usually single value like "Central Air", "None"
+    Cooling:                           cleanSingleValue(get('Cooling')),
+    
+    // Sewer: Usually single value like "Municipal", "Septic"
+    Sewer:                             cleanSingleValue(get('Sewer')),
 
-    // Single value property characteristics
+    // =========================================================================
+    // PROPERTY FEATURES - MULTI-VALUES (stored as comma-separated strings)
+    // =========================================================================
+    // These genuinely contain multiple values and will be stored as comma-separated strings
+    
+    // Basement: Can have multiple values like "Finished, Separate Entrance"
+    Basement:                          cleanArrayValue(get('Basement')),
+    
+    // ExteriorFeatures: Multiple features like "Deck, Garage, Patio"
+    ExteriorFeatures:                  cleanArrayValue(get('ExteriorFeatures')),
+    
+    // InteriorFeatures: Multiple features like "Hardwood Floors, Fireplace"
+    InteriorFeatures:                  cleanArrayValue(get('InteriorFeatures')),
+    
+    // PoolFeatures: Multiple features like "Inground Pool, Pool Heater"
+    PoolFeatures:                      cleanArrayValue(get('PoolFeatures')),
+    
+    // PropertyFeatures: General property features as comma-separated string
+    PropertyFeatures:                  cleanArrayValue(get('PropertyFeatures')),
+
+    // =========================================================================
+    // SINGLE VALUE PROPERTY CHARACTERISTICS
+    // =========================================================================
     HeatType:                          get('HeatType'),
     FireplaceYN:                       get('FireplaceYN'),
     LivingAreaRange:                   get('LivingAreaRange'),
@@ -160,7 +138,9 @@ export function mapCommonFields(idx = {}, vow = {}) {
     LotSizeRangeAcres:                 get('LotSizeRangeAcres'),
     PossessionType:                    get('PossessionType'),
 
-    // Parking information
+    // =========================================================================
+    // PARKING INFORMATION (keeping original values as-is)
+    // =========================================================================
     CoveredSpaces:                     get('CoveredSpaces'),
     ParkingSpaces:                     get('ParkingSpaces'),
     ParkingTotal:                      get('ParkingTotal')
