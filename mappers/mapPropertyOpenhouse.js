@@ -1,38 +1,32 @@
 // mappers/mapPropertyOpenhouse.js
+
+// Import only necessary helpers from the new utility files
+import { cleanSingleValue } from '../utils/valueCleaners.js';
+import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
+import { formatOpenHouseDate, formatOpenHouseTime } from '../utils/dateTimeHelpers.js';
+
 export function mapPropertyOpenhouse(idxItem = {}, vowItem = {}) {
   const get = (field) => idxItem[field] ?? vowItem[field] ?? null;
+  
+  // Get raw date and times
+  const rawDate = get('OpenHouseDate');
+  const rawStartTime = get('OpenHouseStartTime');
+  const rawEndTime = get('OpenHouseEndTime');
+  
+  // Use date/time helpers to format values
+  const dateInfo = formatOpenHouseDate(rawDate);
+  const timeInfo = formatOpenHouseTime(rawStartTime, rawEndTime);
 
   return {
-    ListingKey:                  get('ListingKey'),
-    OpenHouseKey:                get('OpenHouseKey'),
-    OpenHouseId:                 get('OpenHouseId'),
-    OpenHouseDate:               get('OpenHouseDate'),
-    OpenHouseStartTime:          get('OpenHouseStartTime'),
-    OpenHouseEndTime:            get('OpenHouseEndTime'),
-    OpenHouseStatus:             get('OpenHouseStatus'),
-    OpenHouseType:               get('OpenHouseType'),
-    OriginalEntryTimestamp:      get('OriginalEntryTimestamp'),
-    ModificationTimestamp:       get('ModificationTimestamp')
+    OpenHouseKey:               cleanSingleValue(get('OpenHouseKey')),
+    ListingKey:                 cleanSingleValue(get('ListingKey')),
+    OpenHouseDate:              dateInfo.isoDate,
+    OpenHouseStartTime:         timeInfo.startTime,
+    OpenHouseEndTime:           timeInfo.endTime,
+    OpenHouseStatus:            cleanSingleValue(get('OpenHouseStatus')),
+    ModificationTimestamp:      cleanTimestamp(get('ModificationTimestamp')),
+    FormattedDate:              dateInfo.formattedDate,
+    FormattedTimeRange:         timeInfo.formattedRange,
+    DayOfWeek:                  dateInfo.dayOfWeek
   };
-}
-
-/**
- * Upserts open house records into the property_openhouse table.
- * 
- * @param {object} supabase - Supabase client
- * @param {Array<object>} records - Raw feed records
- */
-export async function upsertOpenHouses(supabase, records) {
-  const mapped = records.map(record => mapPropertyOpenhouse(record, {}));
-
-  const { data, error } = await supabase
-    .from('property_openhouse')
-    .upsert(mapped, { onConflict: 'OpenHouseKey' });
-
-  if (error) {
-    console.error('❌ Error upserting open houses:', error);
-    throw error;
-  } else {
-    console.log(`✅ Upserted ${mapped.length} open house records`);
-  }
 }

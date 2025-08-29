@@ -1,38 +1,31 @@
 // mappers/mapResidentialFreehold.js
-// ✅ Renamed file and fixed function name to match convention
+
+// Import helpers from new utility files
+import { cleanSingleValue } from '../utils/valueCleaners.js';
+import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
+import { buildLotSize } from '../utils/measurementFormatters.js';
 
 export function mapResidentialFreehold(idx = {}, vow = {}) {
   const get = (field) => vow[field] ?? idx[field] ?? null;
 
+  // Use the buildLotSize helper function
+  const LotSize = buildLotSize(get('LotWidth'), get('LotDepth'), get('LotSizeUnits'));
+
+  // For upserts: use existing timestamps if available, otherwise let DB defaults handle it
+  const now = new Date().toISOString();
+  const existingCreatedAt = get('CreatedAt');
+
   return {
-    LotDepth:              get('LotDepth'),
-    LotWidth:              get('LotWidth'),
-    LotSizeUnits:          get('LotSizeUnits'),
-    ApproximateAge:        get('ApproximateAge'),
-    AdditionalMonthlyFee:  get('AdditionalMonthlyFee'),
-    LotSizeRangeAcres:     get('LotSizeRangeAcres'),
-    TaxAnnualAmount:       get('TaxAnnualAmount'),
-    TaxYear:               get('TaxYear')
+    ListingKey:                 cleanSingleValue(get('ListingKey')),
+    LotSize:                    LotSize,
+    ApproximateAge:             get('ApproximateAge'),
+    AdditionalMonthlyFee:       get('AdditionalMonthlyFee'),
+    TaxAnnualAmount:            get('TaxAnnualAmount'),
+    TaxYear:                    get('TaxYear'),
+    ModificationTimestamp:      cleanTimestamp(get('ModificationTimestamp')),
+    SystemModificationTimestamp: cleanTimestamp(get('SystemModificationTimestamp')),
+    OriginalEntryTimestamp:     cleanTimestamp(get('OriginalEntryTimestamp')),
+    CreatedAt:                  existingCreatedAt || now,
+    UpdatedAt:                  now
   };
-}
-
-/**
- * Upserts residential freehold records into the residential_freehold table.
- * 
- * @param {object} supabase - Supabase client
- * @param {Array<object>} records - Raw feed records
- */
-export async function upsertResidentialFreehold(supabase, records) {
-  const mapped = records.map(record => mapResidentialFreehold(record, {}));
-
-  const { data, error } = await supabase
-    .from('residential_freehold') // <-- replace with your actual table name
-    .upsert(mapped, { onConflict: 'ListingKey' });
-
-  if (error) {
-    console.error('❌ Error upserting residential freehold records:', error);
-    throw error;
-  } else {
-    console.log(`✅ Upserted ${mapped.length} residential freehold records`);
-  }
 }

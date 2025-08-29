@@ -1,24 +1,47 @@
 // mappers/mapResidentialLease.js
 
-// Helper function
-function extractSingleFromArrayString(value) {
-  if (!value) return null;
-  return Array.isArray(value) && value.length > 0 ? value[0] : value;
-}
+// Import only necessary helpers from the new utility files
+import { cleanValue, cleanSingleValue } from '../utils/valueCleaners.js';
+import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
 
 export function mapResidentialLease(idx = {}, vow = {}) {
   const get = (field) => vow[field] ?? idx[field] ?? null;
-
-  const cleanDate = (v) => {
-    if (!v) return null;
-    const d = new Date(v);
-    return Number.isFinite(d.getTime()) ? d.toISOString() : null;
-  };
-
+  
+  // For RESO compliance, keep essential timestamps
   return {
-    ListingKey:                 get('ListingKey'),
-    Furnished:                  extractSingleFromArrayString(get('Furnished')),
-    RentIncludes:               get('RentIncludes') || [],
-    SystemModificationTimestamp: cleanDate(get('SystemModificationTimestamp')),
+    // Core fields
+    ListingKey:                 cleanSingleValue(get('ListingKey')),
+    Furnished:                  cleanValue(get('Furnished')),
+    RentIncludes:               cleanValue(get('RentIncludes')),
+    
+    // Essential RESO timestamps
+    ModificationTimestamp:      cleanTimestamp(get('ModificationTimestamp')),
+    SystemModificationTimestamp: cleanTimestamp(get('SystemModificationTimestamp')),
+    OriginalEntryTimestamp:     cleanTimestamp(get('OriginalEntryTimestamp')),
+    
+    // Database housekeeping
+    CreatedAt:                  get('CreatedAt') || new Date().toISOString(),
+    UpdatedAt:                  new Date().toISOString()
   };
+}
+
+/**
+ * Upserts residential lease records into the residential_lease table.
+ * 
+ * @param {object} supabase - Supabase client
+ * @param {Array<object>} records - Raw feed records
+ */
+export async function upsertResidentialLease(supabase, records) {
+  const mapped = records.map(record => mapResidentialLease(record, {}));
+
+  const { data, error } = await supabase
+    .from('residential_lease')
+    .upsert(mapped, { onConflict: 'ListingKey' });
+
+  if (error) {
+    console.error('Error upserting residential lease records:', error);
+    throw error;
+  } else {
+    console.log(`Upserted ${mapped.length} residential lease records`);
+  }
 }

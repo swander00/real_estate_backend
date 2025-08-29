@@ -1,13 +1,28 @@
 // mappers/mapCommonFields.js
 // Maps and normalizes common fields from IDX and VOW data sources for real estate listings
 
+// Import helpers from new utility files
 import {
+  cleanValue,
   cleanSingleValue,
   cleanArrayValue,
-  capitalizeWords,
-  normalizeCityName,
-  cleanTimestamp
-} from './mapperHelpers.js';
+  deepCleanArray
+} from '../utils/valueCleaners.js';
+
+import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
+
+import { capitalizeWords } from '../utils/textFormatters.js';
+
+import { normalizeCityName } from '../utils/locationHelpers.js';
+
+import {
+  mapPropertySubType,
+  mapArchitecturalStyle,
+  normalizeMlsStatus,
+  parseBasementInfo
+} from '../utils/propertyClassifiers.js';
+
+// Removed buildLotSize import as it's no longer needed
 
 /**
  * Maps common fields from IDX and VOW data sources
@@ -15,6 +30,66 @@ import {
  */
 export function mapCommonFields(idx = {}, vow = {}) {
   const get = field => (vow[field] ?? idx[field] ?? null);
+
+  // =========================================================================
+  // PROCESS FIELDS WITH SPECIAL CLEANING
+  // =========================================================================
+  
+  // MLS Status with transaction type fallback
+  const MlsStatus = normalizeMlsStatus(get('MlsStatus'), get('TransactionType'));
+  
+  // Property SubType mapping
+  const PropertySubType = mapPropertySubType(get('PropertySubType'));
+  
+  // Architectural Style mapping
+  const ArchitecturalStyle = mapArchitecturalStyle(get('ArchitecturalStyle'));
+  
+  // Basement and Entrance cleaning
+  const basementInfo = parseBasementInfo(get('Basement'));
+  const Basement = basementInfo.basement && 
+    basementInfo.basement.length > 0 && 
+    !basementInfo.basement.every(item => item === "None") 
+      ? basementInfo.basement.filter(item => item !== "None").join(", ")
+      : null;
+      
+  const BasementEntrance = basementInfo.entrances && 
+    basementInfo.entrances.length > 0 && 
+    !basementInfo.entrances.every(item => item === "None") 
+      ? basementInfo.entrances.filter(item => item !== "None").join(", ")
+      : null;
+  
+  // Interior Features cleaning
+  const cleanedInteriorFeatures = deepCleanArray(get('InteriorFeatures'));
+  const InteriorFeatures = cleanedInteriorFeatures 
+    ? cleanedInteriorFeatures.join(", ")
+    : null;
+  
+  // Property Features cleaning
+  const cleanedPropertyFeatures = deepCleanArray(get('PropertyFeatures'));
+  const PropertyFeatures = cleanedPropertyFeatures
+    ? cleanedPropertyFeatures.join(", ")
+    : null;
+  
+  // Pool Features cleaning
+  const cleanedPoolFeatures = deepCleanArray(get('PoolFeatures'));
+  const PoolFeatures = cleanedPoolFeatures
+    ? cleanedPoolFeatures.join(", ")
+    : null;
+  
+  // Exterior Features cleaning
+  const cleanedExteriorFeatures = deepCleanArray(get('ExteriorFeatures'));
+  const ExteriorFeatures = cleanedExteriorFeatures
+    ? cleanedExteriorFeatures.join(", ")
+    : null;
+  
+  // Sewer - handle as single value, not array
+  const sewerValue = get('Sewer');
+  // If it's already an array, get the first value; otherwise, clean as is
+  const Sewer = Array.isArray(sewerValue) 
+    ? cleanSingleValue(sewerValue[0]) 
+    : cleanSingleValue(sewerValue);
+  
+  // Removed entire LotSize processing block as it's now handled in residentialFreehold mapper
 
   return {
     // =========================================================================
@@ -25,22 +100,19 @@ export function mapCommonFields(idx = {}, vow = {}) {
     ClosePrice:                        get('ClosePrice'),
 
     // =========================================================================
-    // STATUS FIELDS
+    // STATUS FIELDS with enhanced cleaning
     // =========================================================================
-    MlsStatus:                         get('MlsStatus'),
+    MlsStatus,                         // Using normalizeMlsStatus helper
     ContractStatus:                    get('ContractStatus'),
     StandardStatus:                    get('StandardStatus'),
     TransactionType:                   get('TransactionType'),
 
     // =========================================================================
-    // PROPERTY TYPE AND STYLE
+    // PROPERTY TYPE AND STYLE with enhanced cleaning
     // =========================================================================
     PropertyType:                      get('PropertyType'),
-    PropertySubType:                   get('PropertySubType'),
-    
-    // ArchitecturalStyle: Usually single value like "2-Storey", "Apartment"
-    // Clean as single value, not array
-    ArchitecturalStyle:                cleanSingleValue(get('ArchitecturalStyle')),
+    PropertySubType,                   // Using mapPropertySubType helper
+    ArchitecturalStyle,                // Using mapArchitecturalStyle helper
 
     // =========================================================================
     // ADDRESS FIELDS
@@ -98,35 +170,16 @@ export function mapCommonFields(idx = {}, vow = {}) {
     UnavailableDate:                   cleanTimestamp(get('UnavailableDate')),
 
     // =========================================================================
-    // PROPERTY FEATURES - SINGLE VALUES (stored as text)
+    // PROPERTY FEATURES - CLEANED and FORMATTED
     // =========================================================================
-    // These often come as arrays but should be stored as single values
-    
-    // Cooling: Usually single value like "Central Air", "None"
-    Cooling:                           cleanSingleValue(get('Cooling')),
-    
-    // Sewer: Usually single value like "Municipal", "Septic"
-    Sewer:                             cleanSingleValue(get('Sewer')),
-
-    // =========================================================================
-    // PROPERTY FEATURES - MULTI-VALUES (stored as comma-separated strings)
-    // =========================================================================
-    // These genuinely contain multiple values and will be stored as comma-separated strings
-    
-    // Basement: Can have multiple values like "Finished, Separate Entrance"
-    Basement:                          cleanArrayValue(get('Basement')),
-    
-    // ExteriorFeatures: Multiple features like "Deck, Garage, Patio"
-    ExteriorFeatures:                  cleanArrayValue(get('ExteriorFeatures')),
-    
-    // InteriorFeatures: Multiple features like "Hardwood Floors, Fireplace"
-    InteriorFeatures:                  cleanArrayValue(get('InteriorFeatures')),
-    
-    // PoolFeatures: Multiple features like "Inground Pool, Pool Heater"
-    PoolFeatures:                      cleanArrayValue(get('PoolFeatures')),
-    
-    // PropertyFeatures: General property features as comma-separated string
-    PropertyFeatures:                  cleanArrayValue(get('PropertyFeatures')),
+    Cooling:                           cleanValue(get('Cooling')),
+    Sewer,                             // Special handling for array to single value
+    Basement,                          // Using parseBasementInfo helper
+    BasementEntrance,                  // Using parseBasementInfo helper
+    ExteriorFeatures,                  // Using deepCleanArray helper with string conversion
+    InteriorFeatures,                  // Using deepCleanArray helper with string conversion
+    PoolFeatures,                      // Using deepCleanArray helper with string conversion
+    PropertyFeatures,                  // Using deepCleanArray helper with string conversion
 
     // =========================================================================
     // SINGLE VALUE PROPERTY CHARACTERISTICS
@@ -135,7 +188,6 @@ export function mapCommonFields(idx = {}, vow = {}) {
     FireplaceYN:                       get('FireplaceYN'),
     LivingAreaRange:                   get('LivingAreaRange'),
     WaterfrontYN:                      get('WaterfrontYN'),
-    LotSizeRangeAcres:                 get('LotSizeRangeAcres'),
     PossessionType:                    get('PossessionType'),
 
     // =========================================================================

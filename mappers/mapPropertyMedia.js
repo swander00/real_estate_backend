@@ -1,89 +1,176 @@
 // mappers/mapPropertyMedia.js
+// Clean RESO-compliant mapper for property_media table
+
+// [1] Imports
+import crypto from "crypto";
+import { cleanSingleValue, cleanInt, cleanBoolean } from "../utils/valueCleaners.js";
+import { cleanTimestamp } from "../utils/dateTimeHelpers.js";
+import { validateResoEnumValue } from "../utils/validationHelpers.js";
+
+// [2] Utility: stable hash for fallback keys
+function stableHash(str) {
+  return crypto.createHash("sha1").update(String(str)).digest("hex");
+}
+
+// [3] Enum lists (can extend later)
+const VALID_MEDIA_TYPES = ["Photo", "Image", "Video", "VirtualTour", "Document", "Audio", "Panorama", "Text"];
+const VALID_MEDIA_CATEGORIES = ["Agent", "Branded", "Floor Plan", "Map", "Property", "Tour", "Office", "Community", "Unbranded", "Aerial"];
+
+// More lenient enum validation that handles case-insensitivity
+function lenientValidateEnum(value, validValues) {
+  if (!value) return null;
+  
+  // Try direct match
+  if (validValues.includes(value)) return value;
+  
+  // Try case-insensitive match
+  const lowerValue = value.toLowerCase();
+  for (const validValue of validValues) {
+    if (validValue.toLowerCase() === lowerValue) {
+      return validValue; // Return properly cased valid value
+    }
+  }
+  
+  return null;
+}
 
 /**
- * Maps raw IDX and VOW media feed items into the property_media table schema.
- * Aligned with the actual database schema structure and constraints.
+ * Map raw feed item into property_media row
+ *
+ * @param {Object} idxItem
+ * @param {Object} vowItem
+ * @returns {Object}
  */
 export function mapPropertyMedia(idxItem = {}, vowItem = {}) {
   const get = (field) => idxItem[field] ?? vowItem[field] ?? null;
 
-  /**
-   * Safely converts timestamp values to proper format
-   * @param {any} v - Timestamp value to clean
-   * @returns {string|null} - ISO timestamp string or null
-   */
-  const cleanTimestamp = (v) => {
-    if (!v) return null;
-    const d = new Date(v);
-    return Number.isFinite(d.getTime()) ? d.toISOString() : null;
-  };
+  // [4] Raw extraction
+  let mediaKey = cleanSingleValue(get("MediaKey"));
+  let rrk = cleanSingleValue(get("ResourceRecordKey"));
+  let mediaUrl = cleanSingleValue(get("MediaURL"));
+  
+  // Extract ListingKey - CRITICAL addition
+  let listingKey = cleanSingleValue(get("ListingKey"));
+  
+  // Log raw field values for debugging
+  const rawMediaType = get("MediaType");
+  const rawMediaCategory = get("MediaCategory");
+  
+  // [5] Fallback fabrication for keys
+  if (!rrk && mediaUrl) {
+    rrk = `rrk_${stableHash(mediaUrl)}`;
+  }
+  if (!mediaKey && rrk && mediaUrl) {
+    mediaKey = `mk_${stableHash(rrk + "|" + mediaUrl)}`;
+  }
+  
+  // If ListingKey is missing, use ResourceRecordKey directly
+  if (!listingKey && rrk) {
+    // Use ResourceRecordKey as-is without any transformation of prefixes
+    listingKey = rrk;
+    
+    // If ResourceRecordKey contains a colon, extract just the first part
+    if (rrk.includes(':')) {
+      listingKey = rrk.split(':')[0];
+    }
+    // No logging to keep output clean
+  }
+  
+  // Infer MediaType from URL if not provided
+  let mediaType = lenientValidateEnum(cleanSingleValue(rawMediaType), VALID_MEDIA_TYPES);
+  if (!mediaType && mediaUrl) {
+    // Try to guess from URL extension
+    const urlLower = mediaUrl.toLowerCase();
+    if (urlLower.endsWith('.jpg') || urlLower.endsWith('.jpeg') || 
+        urlLower.endsWith('.png') || urlLower.endsWith('.gif') || 
+        urlLower.endsWith('.webp')) {
+      mediaType = "Photo";
+    } else if (urlLower.endsWith('.mp4') || urlLower.endsWith('.avi') || 
+               urlLower.endsWith('.mov') || urlLower.includes('youtube.com') || 
+               urlLower.includes('vimeo.com')) {
+      mediaType = "Video";
+    } else if (urlLower.includes('tour') || urlLower.includes('360') || 
+               urlLower.includes('virtual')) {
+      mediaType = "VirtualTour";
+    } else if (urlLower.endsWith('.pdf') || urlLower.endsWith('.doc') || 
+               urlLower.endsWith('.docx')) {
+      mediaType = "Document";
+    } else {
+      mediaType = "Image"; // Default to Image if we can't determine
+    }
+  }
+  
+  // Set default MediaCategory if not provided
+  let mediaCategory = lenientValidateEnum(cleanSingleValue(rawMediaCategory), VALID_MEDIA_CATEGORIES);
+  if (!mediaCategory) {
+    mediaCategory = "Property"; // Default to Property
+  }
 
-  /**
-   * Safely converts values to integers
-   * @param {any} v - Value to convert to integer
-   * @returns {number|null} - Integer or null
-   */
-  const cleanInt = (v) => {
-    const n = parseInt(v, 10);
-    return Number.isFinite(n) ? n : null;
-  };
-
-  /**
-   * Safely converts values to boolean
-   * @param {any} v - Value to convert to boolean
-   * @returns {boolean|null} - Boolean or null
-   */
-  const cleanBoolean = (v) => {
-    if (v === null || v === undefined) return null;
-    if (typeof v === 'boolean') return v;
-    const str = String(v).toLowerCase().trim();
-    return str === 'true' || str === '1' || str === 'yes';
-  };
-
+  // [6] Return mapped object aligned to DB schema
   return {
-    // Primary key - MediaKey is the single primary key (not composite)
-    MediaKey:                     get('MediaKey'),           // Primary key
-    
-    // Required fields based on schema constraints
-    ResourceRecordKey:            get('ResourceRecordKey'),  // Required, part of unique constraint
-    MediaURL:                     get('MediaURL'),           // Required, part of unique constraint
-    
-    // Foreign key relationships
-    ListingKey:                   get('ListingKey') || get('ResourceRecordKey'), // FK to common_fields
-    ResourceRecordID:             get('ResourceRecordID'),   // Human-readable identifier per RESO standard
-    
-    // Schema field that was missing from mapper
-    ClassName:                    get('ClassName'),          // Present in schema, missing in mapper
-    
-    // Media classification and metadata
-    ResourceName:                 get('ResourceName'),
-    MediaType:                    get('MediaType'),
-    MediaCategory:                get('MediaCategory'),
-    MediaStatus:                  get('MediaStatus'),
-    MediaObjectID:                get('MediaObjectID'),
-    
-    // Image-specific fields
-    ImageOf:                      get('ImageOf'),
-    ImageSizeDescription:         get('ImageSizeDescription'),
-    ShortDescription:             get('ShortDescription'),
-    
-    // Ordering and preferences
-    Order:                        cleanInt(get('Order')),    // Integer field
-    PreferredPhotoYN:             cleanBoolean(get('PreferredPhotoYN')), // Boolean field
-    
-    // System identification
-    OriginatingSystemID:          get('OriginatingSystemID'),
-    
-    // Timestamps - all are timestamp without time zone
-    MediaModificationTimestamp:   cleanTimestamp(get('MediaModificationTimestamp')),
-    ModificationTimestamp:        cleanTimestamp(get('ModificationTimestamp')),
-    SystemModificationTimestamp:  cleanTimestamp(get('SystemModificationTimestamp')),
-    OriginalEntryTimestamp:       cleanTimestamp(get('OriginalEntryTimestamp')),
-    
-    // Database managed timestamps (explicitly set to ensure trigger compatibility)
-    UpdatedAt:                    cleanTimestamp(new Date()), // Current timestamp for updates
-    
-    // Note: CreatedAt and UpdatedAt are handled automatically by database defaults and triggers
-    // They should not be included in the mapper as they're managed by PostgreSQL
+    MediaKey: mediaKey,                                // PK
+    ResourceRecordKey: rrk,                            // Media identifier 
+    ListingKey: listingKey,                            // CRITICAL: Parent key
+    ResourceName: cleanSingleValue(get("ResourceName")) ?? "Property",
+    ClassName: cleanSingleValue(get("ClassName")) ?? "Unknown",
+
+    MediaURL: mediaUrl,                                // NOT NULL
+    ImageOf: cleanSingleValue(get("ImageOf")),
+    ImageSizeDescription: cleanSingleValue(get("ImageSizeDescription")),
+    MediaCategory: mediaCategory,                      // Using our improved validation/fallback
+    MediaType: mediaType,                              // Using our improved validation/fallback
+    MediaObjectID: cleanSingleValue(get("MediaObjectID")),
+    MediaStatus: cleanSingleValue(get("MediaStatus")),
+    ShortDescription: cleanSingleValue(get("ShortDescription")),
+    Order: cleanInt(get("Order")),
+    PreferredPhotoYN: cleanBoolean(get("PreferredPhotoYN")),
+    OriginatingSystemID: cleanSingleValue(get("OriginatingSystemID")),
+
+    MediaModificationTimestamp: cleanTimestamp(get("MediaModificationTimestamp")),
+    ModificationTimestamp: cleanTimestamp(get("ModificationTimestamp")),
   };
+}
+
+/**
+ * Upsert function for Supabase
+ *
+ * @param {import('@supabase/supabase-js').SupabaseClient} supabase
+ * @param {Array<Object>} records
+ */
+export async function upsertPropertyMedia(supabase, records) {
+  // [7] Map
+  const mapped = records.map((r) => mapPropertyMedia(r, {}));
+
+  // [8] Validate required fields for DB (NOT NULL constraints)
+  const valid = mapped.filter(
+    (m) => m.MediaKey && m.ResourceRecordKey && m.ListingKey && m.ResourceName && m.ClassName && m.MediaURL
+  );
+
+  if (valid.length === 0) {
+    console.warn("[property_media] No valid media rows to upsert.");
+    return { success: true, count: 0 };
+  }
+
+  // [9] Batch UPSERT
+  let successCount = 0;
+  const BATCH_SIZE = 500;
+
+  for (let i = 0; i < valid.length; i += BATCH_SIZE) {
+    const chunk = valid.slice(i, i + BATCH_SIZE);
+
+    const { error } = await supabase
+      .from("property_media")
+      .upsert(chunk, {
+        onConflict: "ResourceRecordKey,MediaURL", // [10] Match with syncListingsIdx.js
+        ignoreDuplicates: false,
+      });
+
+    if (error) {
+      console.error(`[property_media] Upsert failed: ${error.message}`);
+      throw error;
+    }
+    successCount += chunk.length;
+  }
+
+  return { success: true, count: successCount };
 }
