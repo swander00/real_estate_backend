@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+env.local
+env.template
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Build output
+dist/
+build/
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+.nyc_output/
+".env" 
+".env.local" 
+".env" 
+".env.local" 
