@@ -14,14 +14,64 @@ import mediaRoutes from './api/routes/media.js';
 import openhouseRoutes from './api/routes/openhouses.js';
 import syncRoutes from './api/routes/sync.js';
 import resoRoutes from './api/routes/reso.js';
+import healthRoutes from './api/routes/health.js';
+import dashboardRoutes from './api/routes/dashboard.js';
+import authRoutes from './api/routes/auth.js';
+import oauthRoutes from './api/routes/oauth.js';
+import cdnRoutes from './api/routes/cdn.js';
 
 // Import middleware
 import { errorHandler } from './api/middleware/errorHandler.js';
 import { requestLogger } from './api/middleware/requestLogger.js';
+import { 
+  requestMonitoring, 
+  errorMonitoring, 
+  performanceMonitoring, 
+  securityMonitoring,
+  rateLimitMonitoring,
+  healthCheckMonitoring 
+} from './api/middleware/monitoring.js';
+
+// Import monitoring services
+import { metricsCollector, logger } from './api/services/monitoringService.js';
+import { alertingService } from './api/services/alertingService.js';
+import { validateMonitoringConfig } from './config/monitoring.js';
+
+// Import cache services
+import { cacheService } from './api/services/cacheService.js';
+import { cacheMiddleware, cacheInvalidation, warmCache } from './api/middleware/cache.js';
+
+// Import database service
+import { databaseService } from './api/services/databaseService.js';
+
+// Import environment validation
+import { environmentValidator } from './config/validation.js';
+
+// Import sync services
+import { syncService } from './api/services/syncService.js';
+import { syncScheduler } from './api/services/syncScheduler.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Validate environment configuration
+try {
+  environmentValidator.validate();
+  console.log('Environment validation completed successfully');
+} catch (error) {
+  console.error('Environment validation failed:', error.message);
+  process.exit(1);
+}
+
+// Validate monitoring configuration
+try {
+  validateMonitoringConfig();
+  console.log('Monitoring configuration validated successfully');
+} catch (error) {
+  console.error('Monitoring configuration validation failed:', error.message);
+  process.exit(1);
+}
 
 // Enhanced Supabase client with better error handling
 export const supabase = createClient(
@@ -42,7 +92,9 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'"],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:3001"],
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
@@ -68,7 +120,7 @@ const generalLimiter = rateLimit({
 
 const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // stricter limit for sensitive endpoints
+  max: 1000, // increased limit for testing sync operations
   message: { error: 'Rate limit exceeded for this endpoint.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -80,6 +132,11 @@ app.use('/api/sync', strictLimiter); // Stricter limits for sync operations
 
 // Compression middleware for better performance
 app.use(compression());
+
+// Static file serving for dashboard
+app.use(express.static('public'));
+
+// Serve sync dashboard (moved before catch-all route)
 
 // Enhanced body parsing middleware with better limits
 app.use(express.json({ 
@@ -102,38 +159,53 @@ app.use(express.urlencoded({
 app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(requestLogger);
 
+// Monitoring middleware
+app.use(requestMonitoring);
+app.use(performanceMonitoring);
+app.use(securityMonitoring);
+app.use(rateLimitMonitoring);
+app.use(healthCheckMonitoring);
+
+// Cache middleware
+app.use(cacheMiddleware);
+app.use(cacheInvalidation);
+
 // Enhanced health check endpoint with more detailed information
 app.get('/health', async (req, res) => {
   try {
-    // Test database connection
-    const { data, error } = await supabase
-      .from('properties')
-      .select('count')
-      .limit(1);
+    const startTime = Date.now();
     
-    const dbStatus = error ? 'disconnected' : 'connected';
+    // Test database connection using database service
+    const dbHealth = await databaseService.healthCheck();
     
+    // Test cache service
+    const cacheHealth = await cacheService.healthCheck();
+    
+    const overallStatus = dbHealth.status === 'healthy' && cacheHealth.status === 'healthy' ? 'healthy' : 'unhealthy';
+
     res.json({ 
-      status: 'OK', 
+      status: overallStatus, 
       timestamp: new Date().toISOString(),
       version: process.env.APP_VERSION || '1.0.0',
+      responseTime: Date.now() - startTime,
+      services: {
+        database: dbHealth,
+        cache: cacheHealth
+      },
       environment: NODE_ENV,
       uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      database: {
-        status: dbStatus,
-        error: error?.message || null
-      },
-      env: {
-        supabase_url_set: !!process.env.SUPABASE_URL,
-        supabase_anon_key_set: !!process.env.SUPABASE_ANON_KEY,
-        node_env: NODE_ENV,
-        port: PORT
+      system: {
+        memory: process.memoryUsage(),
+        cpu: process.cpuUsage(),
+        platform: process.platform,
+        nodeVersion: process.version
       }
     });
+
   } catch (error) {
-    res.status(500).json({
-      status: 'ERROR',
+    logger.error('Health check failed', { error: error.message });
+    res.status(503).json({
+      status: 'unhealthy',
       error: error.message,
       timestamp: new Date().toISOString()
     });
@@ -578,6 +650,74 @@ app.use('/api/sync', syncRoutes);
 // RESO Web API 2.0.0 routes
 app.use('/api/reso', resoRoutes);
 
+// Authentication routes
+app.use('/auth', authRoutes);
+app.use('/auth/oauth', oauthRoutes);
+
+// CDN routes
+app.use('/cdn', cdnRoutes);
+
+// Monitoring and health check routes
+app.use('/health', healthRoutes);
+app.use('/dashboard', dashboardRoutes);
+
+// Cache management routes
+app.get('/cache/stats', async (req, res) => {
+  try {
+    const stats = await cacheService.getStats();
+    res.json({
+      cache: stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get cache statistics',
+      message: error.message
+    });
+  }
+});
+
+app.post('/cache/clear', async (req, res) => {
+  try {
+    const { pattern } = req.body;
+    
+    if (pattern) {
+      const deletedCount = await cacheService.invalidatePattern(pattern);
+      res.json({
+        message: `Cache cleared for pattern: ${pattern}`,
+        deletedCount,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      await cacheService.flush();
+      res.json({
+        message: 'All cache cleared',
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to clear cache',
+      message: error.message
+    });
+  }
+});
+
+app.post('/cache/warm', async (req, res) => {
+  try {
+    await warmCache();
+    res.json({
+      message: 'Cache warming completed',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to warm cache',
+      message: error.message
+    });
+  }
+});
+
 // Enhanced root endpoint with more information
 app.get('/', (req, res) => {
   res.json({
@@ -603,6 +743,11 @@ app.get('/', (req, res) => {
   });
 });
 
+// Serve sync dashboard
+app.get('/sync-dashboard', (req, res) => {
+  res.sendFile('sync-dashboard.html', { root: 'public' });
+});
+
 // Enhanced 404 handler with suggestions
 app.use('*', (req, res) => {
   const suggestions = [];
@@ -616,6 +761,8 @@ app.use('*', (req, res) => {
     suggestions.push('The health endpoint is available at /health');
   } else if (path === '/test') {
     suggestions.push('The test page is available at /test');
+  } else if (path === '/sync-dashboard') {
+    suggestions.push('The sync dashboard is available at /sync-dashboard');
   }
   
   res.status(404).json({ 
@@ -626,6 +773,9 @@ app.use('*', (req, res) => {
     availableEndpoints: ['/', '/health', '/test', '/api/properties', '/api/media', '/api/openhouses', '/api/sync', '/api/reso']
   });
 });
+
+// Error monitoring middleware (must be before error handler)
+app.use(errorMonitoring);
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
@@ -642,15 +792,43 @@ process.on('SIGINT', () => {
 });
 
 // Start server with enhanced logging
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`🚀 Real Estate Backend Server v${process.env.APP_VERSION || '1.0.0'} is running!`);
   console.log(`📍 Environment: ${NODE_ENV}`);
   console.log(`🌐 Server: http://localhost:${PORT}`);
   console.log(`🔗 API Base: http://localhost:${PORT}/api`);
   console.log(`💚 Health Check: http://localhost:${PORT}/health`);
-  console.log(`🧪 Test Page: http://localhost:${PORT}/test`);
-  console.log(`⏰ Started at: ${new Date().toISOString()}`);
-  console.log(`📊 Process ID: ${process.pid}`);
+  console.log(`📈 Dashboard: http://localhost:${PORT}/dashboard.html`);
+  console.log(`🔄 Sync Dashboard: http://localhost:${PORT}/sync-dashboard`);
+  console.log(`💾 Cache Stats: http://localhost:${PORT}/cache/stats`);
+  
+  // Initialize sync services
+  try {
+    await syncService.initialize();
+    console.log(`🔄 Sync service initialized`);
+  } catch (error) {
+    console.log(`⚠️  Sync service initialization failed: ${error.message}`);
+  }
+
+  // Start sync scheduler (only in production or when explicitly enabled)
+  if (NODE_ENV === 'production' || process.env.ENABLE_SYNC_SCHEDULER === 'true') {
+    try {
+      await syncScheduler.initialize();
+      console.log(`⏰ Sync scheduler started`);
+    } catch (error) {
+      console.log(`⚠️  Sync scheduler failed to start: ${error.message}`);
+    }
+  } else {
+    console.log(`⏸️  Sync scheduler disabled (set ENABLE_SYNC_SCHEDULER=true to enable)`);
+  }
+
+  // Warm cache on startup
+  try {
+    await warmCache();
+    console.log(`🔥 Cache warmed successfully`);
+  } catch (error) {
+    console.log(`⚠️  Cache warming failed: ${error.message}`);
+  }
 });
 
 // Handle server errors
@@ -672,6 +850,36 @@ server.on('error', (error) => {
       break;
     default:
       throw error;
+  }
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Received SIGINT, shutting down gracefully...');
+  
+  try {
+    // Stop sync scheduler
+    await syncScheduler.stop();
+    console.log('✅ Sync scheduler stopped');
+    
+    // Stop accepting new connections
+    server.close(() => {
+      console.log('✅ HTTP server closed');
+    });
+    
+    // Close database connections
+    await databaseService.close();
+    console.log('✅ Database connections closed');
+    
+    // Close cache connections
+    await cacheService.close();
+    console.log('✅ Cache connections closed');
+    
+    console.log('✅ Graceful shutdown completed');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error during shutdown:', error.message);
+    process.exit(1);
   }
 });
 

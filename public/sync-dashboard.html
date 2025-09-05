@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Backend - Sync Dashboard</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #3498db;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 10px 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .status-display {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .status-value {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .status-healthy {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-warning {
+            background: #fef9e7;
+            color: #f39c12;
+        }
+
+        .status-error {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .status-idle {
+            background: #ebf3fd;
+            color: #3498db;
+        }
+
+        .log-container {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px 0;
+        }
+
+        .log-timestamp {
+            color: #95a5a6;
+        }
+
+        .log-info {
+            color: #3498db;
+        }
+
+        .log-success {
+            color: #27ae60;
+        }
+
+        .log-warning {
+            color: #f39c12;
+        }
+
+        .log-error {
+            color: #e74c3c;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Progress Dashboard Styles */
+        .progress-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .progress-percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .progress-stat {
+            text-align: center;
+        }
+
+        .progress-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .progress-stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .table-progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .table-progress-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .table-progress-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .table-progress-card.completed {
+            border-left-color: #27ae60;
+        }
+
+        .table-progress-card.failed {
+            border-left-color: #e74c3c;
+        }
+
+        .table-progress-card.in-progress {
+            border-left-color: #f39c12;
+        }
+
+        .table-progress-card.pending {
+            border-left-color: #95a5a6;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .table-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-in-progress {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .status-failed {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .status-pending {
+            background: #ebf3fd;
+            color: #3498db;
+        }
+
+        .table-progress-bar {
+            background: #ecf0f1;
+            border-radius: 5px;
+            height: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .table-progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .table-progress-fill.completed {
+            background: #27ae60;
+        }
+
+        .table-progress-fill.in-progress {
+            background: #f39c12;
+        }
+
+        .table-progress-fill.failed {
+            background: #e74c3c;
+        }
+
+        .table-progress-fill.pending {
+            background: #95a5a6;
+        }
+
+        .table-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .table-detail {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .table-detail-label {
+            font-weight: 500;
+        }
+
+        .table-detail-value {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .error-details {
+            background: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #dc2626;
+        }
+
+        .data-source-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .data-source-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.3s ease;
+        }
+
+        .data-source-card.connected {
+            border-color: #27ae60;
+        }
+
+        .data-source-card.error {
+            border-color: #e74c3c;
+        }
+
+        .data-source-card.connecting {
+            border-color: #f39c12;
+        }
+
+        .data-source-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .data-source-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .data-source-status-text {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .real-time-stats {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .current-phase {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .phase-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .phase-description {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 5px solid;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #3498db;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #27ae60;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #f39c12;
+            color: #856404;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Sync Dashboard</h1>
+            <p>Real Estate Backend - Database Synchronization Management</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+
+            <!-- Authentication Notice -->
+            <div class="alert alert-info" id="authNotice" style="display: none;">
+                <strong>🔐 Authentication Required:</strong> To use sync operations, you need to provide a JWT token in the Settings tab. 
+                Get your token from Supabase Auth or contact your administrator.
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('operations')">Operations</div>
+                <div class="tab" onclick="switchTab('progress')">Progress</div>
+                <div class="tab" onclick="switchTab('status')">Status</div>
+                <div class="tab" onclick="switchTab('logs')">Logs</div>
+                <div class="tab" onclick="switchTab('settings')">Settings</div>
+            </div>
+
+            <!-- Operations Tab -->
+            <div id="operations" class="tab-content active">
+                <div class="section">
+                    <h2>🚀 Backfill Operations</h2>
+                    <p>Perform initial data loading from IDX and VOW APIs</p>
+                    
+                    <div class="form-group">
+                        <label>Select Providers:</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="idxProvider" checked>
+                            <label for="idxProvider">IDX</label>
+                            <input type="checkbox" id="vowProvider" checked>
+                            <label for="vowProvider">VOW</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sync Type:</label>
+                        <select id="syncType">
+                            <option value="full">Full Sync (Complete Backfill)</option>
+                            <option value="incremental">Incremental Sync</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="forceSync">
+                        <label for="forceSync">Force Sync (Overwrite existing data)</label>
+                    </div>
+
+                    <div class="button-grid">
+                        <button class="btn btn-success" onclick="triggerBackfill()">
+                            <span>🚀</span> Start Backfill
+                        </button>
+                        <button class="btn btn-warning" onclick="triggerIncrementalSync()">
+                            <span>🔄</span> Incremental Sync
+                        </button>
+                        <button class="btn btn-danger" onclick="stopAllSyncs()">
+                            <span>⏹️</span> Stop All Syncs
+                        </button>
+                        <button class="btn" onclick="testSyncConnection()">
+                            <span>🔍</span> Test Connection
+                        </button>
+                        <button class="btn" onclick="getJwtToken()">
+                            <span>🔑</span> Supabase Login
+                        </button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>⚡ Quick Actions</h2>
+                    <div class="button-grid">
+                        <button class="btn" onclick="triggerIdxSync()">
+                            <span>📡</span> IDX Sync
+                        </button>
+                        <button class="btn" onclick="triggerVowSync()">
+                            <span>📡</span> VOW Sync
+                        </button>
+                        <button class="btn btn-warning" onclick="refreshStatus()">
+                            <span>🔄</span> Refresh Status
+                        </button>
+                        <button class="btn btn-danger" onclick="clearLogs()">
+                            <span>🗑️</span> Clear Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tab -->
+            <div id="progress" class="tab-content">
+                <!-- Overall Progress Overview -->
+                <div class="progress-overview">
+                    <div class="progress-header">
+                        <div class="progress-title">🔄 Sync Progress</div>
+                        <div class="progress-percentage" id="overallProgress">0%</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="overallProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="progress-stat">
+                            <div class="progress-stat-value" id="totalRecords">0</div>
+                            <div class="progress-stat-label">Total Records</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-value" id="processedRecords">0</div>
+                            <div class="progress-stat-label">Processed</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-value" id="successRate">0%</div>
+                            <div class="progress-stat-label">Success Rate</div>
+                        </div>
+                        <div class="progress-stat">
+                            <div class="progress-stat-value" id="processingSpeed">0</div>
+                            <div class="progress-stat-label">Records/sec</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Phase -->
+                <div class="current-phase" id="currentPhase" style="display: none;">
+                    <div class="phase-title" id="phaseTitle">Initializing Sync</div>
+                    <div class="phase-description" id="phaseDescription">Preparing to fetch data from external sources</div>
+                </div>
+
+                <!-- Data Source Status -->
+                <div class="section">
+                    <h2>🌐 Data Source Status</h2>
+                    <div class="data-source-status">
+                        <div class="data-source-card" id="idxStatus">
+                            <div class="data-source-icon">🏠</div>
+                            <div class="data-source-name">IDX Feed</div>
+                            <div class="data-source-status-text" id="idxStatusText">Disconnected</div>
+                        </div>
+                        <div class="data-source-card" id="vowStatus">
+                            <div class="data-source-icon">🔑</div>
+                            <div class="data-source-name">VOW Feed</div>
+                            <div class="data-source-status-text" id="vowStatusText">Disconnected</div>
+                        </div>
+                        <div class="data-source-card" id="dbStatus">
+                            <div class="data-source-icon">🗄️</div>
+                            <div class="data-source-name">Database</div>
+                            <div class="data-source-status-text" id="dbStatusText">Disconnected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Statistics -->
+                <div class="section">
+                    <h2>📈 Real-time Statistics</h2>
+                    <div class="real-time-stats">
+                        <div class="stats-row">
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalFetched">0</div>
+                                <div class="stat-label">Total Fetched</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalProcessed">0</div>
+                                <div class="stat-label">Total Processed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalFailed">0</div>
+                                <div class="stat-label">Total Failed</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="currentBatch">0</div>
+                                <div class="stat-label">Current Batch</div>
+                            </div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stat-item">
+                                <div class="stat-value" id="avgSpeed">0</div>
+                                <div class="stat-label">Avg Speed (rec/sec)</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="estimatedTime">--</div>
+                                <div class="stat-label">Est. Time Remaining</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="retryCount">0</div>
+                                <div class="stat-label">Retry Attempts</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="lastUpdate">--</div>
+                                <div class="stat-label">Last Update</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Progress -->
+                <div class="section">
+                    <h2>📋 Table Progress</h2>
+                    <div class="table-progress-grid" id="tableProgressGrid">
+                        <!-- Table progress cards will be dynamically generated here -->
+                    </div>
+                </div>
+
+                <!-- Error Summary -->
+                <div class="section" id="errorSummary" style="display: none;">
+                    <h2>⚠️ Error Summary</h2>
+                    <div id="errorDetails">
+                        <!-- Error details will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Tab -->
+            <div id="status" class="tab-content">
+                <div class="section">
+                    <h2>📊 System Status</h2>
+                    <div class="status-display" id="systemStatus">
+                        <div class="status-item">
+                            <span class="status-label">Server Status</span>
+                            <span class="status-value status-idle" id="serverStatus">Checking...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Database Status</span>
+                            <span class="status-value status-idle" id="dbStatus">Checking...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Cache Status</span>
+                            <span class="status-value status-idle" id="cacheStatus">Checking...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Active Sync Jobs</span>
+                            <span class="status-value status-idle" id="activeJobs">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>📈 Sync Statistics</h2>
+                    <div class="stats-grid" id="syncStats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalJobs">-</div>
+                            <div class="stat-label">Total Jobs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="successRate">-</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="avgDuration">-</div>
+                            <div class="stat-label">Avg Duration</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalRecords">-</div>
+                            <div class="stat-label">Total Records</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>🔄 Active Jobs</h2>
+                    <div id="activeJobsList" class="status-display">
+                        <p>No active jobs</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div id="logs" class="tab-content">
+                <div class="section">
+                    <h2>📝 Activity Logs</h2>
+                    <div class="log-container" id="logContainer">
+                        <div class="log-entry">
+                            <span class="log-timestamp">[2025-01-01 00:00:00]</span>
+                            <span class="log-info">Sync Dashboard initialized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="section">
+                    <h2>⚙️ Configuration</h2>
+                    
+                    <div class="form-group">
+                        <label>API Base URL:</label>
+                        <input type="text" id="apiBaseUrl" value="http://localhost:3000" placeholder="http://localhost:3000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>JWT Token (for authentication):</label>
+                        <input type="password" id="jwtToken" placeholder="Enter your JWT token">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Auto-refresh interval (seconds):</label>
+                        <select id="refreshInterval">
+                            <option value="5">5 seconds</option>
+                            <option value="10" selected>10 seconds</option>
+                            <option value="30">30 seconds</option>
+                            <option value="60">1 minute</option>
+                            <option value="0">Disabled</option>
+                        </select>
+                    </div>
+
+                    <div class="button-grid">
+                        <button class="btn" onclick="saveSettings()">
+                            <span>💾</span> Save Settings
+                        </button>
+                        <button class="btn btn-warning" onclick="testConnection()">
+                            <span>🔍</span> Test Connection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let refreshInterval = null;
+        let logs = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            refreshStatus();
+            startAutoRefresh();
+            addLog('info', 'Sync Dashboard initialized');
+            checkAuthenticationStatus();
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            const clickedTab = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+        }
+
+        // API Helper Functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const apiBaseUrl = document.getElementById('apiBaseUrl').value;
+            const jwtToken = document.getElementById('jwtToken').value;
+            
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (jwtToken) {
+                options.headers['Authorization'] = `Bearer ${jwtToken}`;
+            }
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Authentication required. Please provide a valid JWT token in Settings.');
+                    } else if (response.status === 403) {
+                        throw new Error('Access denied. Admin permissions required.');
+                    } else {
+                        throw new Error(result.message || `HTTP ${response.status}`);
+                    }
+                }
+                
+                return result;
+            } catch (error) {
+                addLog('error', `API call failed: ${error.message}`);
+                throw error;
+            }
+        }
+
+        // Backfill Operations
+        async function triggerBackfill() {
+            const providers = [];
+            if (document.getElementById('idxProvider').checked) providers.push('idx');
+            if (document.getElementById('vowProvider').checked) providers.push('vow');
+            
+            if (providers.length === 0) {
+                showAlert('Please select at least one provider', 'warning');
+                return;
+            }
+
+            const jwtToken = document.getElementById('jwtToken').value;
+            if (!jwtToken) {
+                showAlert('Authentication required. Please provide a JWT token in Settings tab.', 'warning');
+                return;
+            }
+
+            const syncType = document.getElementById('syncType').value;
+            const force = document.getElementById('forceSync').checked;
+
+            try {
+                addLog('info', `Starting ${syncType} backfill for ${providers.join(', ')}`);
+                
+                const result = await apiCall('/api/sync/backfill', 'POST', {
+                    providers: providers,
+                    force: force
+                });
+
+                showAlert(`Backfill started successfully! Job IDs: ${result.jobIds.join(', ')}`, 'success');
+                addLog('success', `Backfill triggered: ${result.jobIds.join(', ')}`);
+                
+                // Refresh status after a short delay
+                setTimeout(refreshStatus, 2000);
+                
+            } catch (error) {
+                showAlert(`Failed to start backfill: ${error.message}`, 'error');
+            }
+        }
+
+        async function triggerIncrementalSync() {
+            const providers = [];
+            if (document.getElementById('idxProvider').checked) providers.push('idx');
+            if (document.getElementById('vowProvider').checked) providers.push('vow');
+            
+            if (providers.length === 0) {
+                showAlert('Please select at least one provider', 'warning');
+                return;
+            }
+
+            const jwtToken = document.getElementById('jwtToken').value;
+            if (!jwtToken) {
+                showAlert('Authentication required. Please provide a JWT token in Settings tab.', 'warning');
+                return;
+            }
+
+            try {
+                addLog('info', `Starting incremental sync for ${providers.join(', ')}`);
+                
+                const promises = providers.map(provider => 
+                    apiCall(`/api/sync/${provider}`, 'POST', { incremental: true })
+                );
+                
+                const results = await Promise.all(promises);
+                
+                showAlert(`Incremental sync started for ${providers.join(', ')}`, 'success');
+                addLog('success', `Incremental sync triggered for: ${providers.join(', ')}`);
+                
+                setTimeout(refreshStatus, 2000);
+                
+            } catch (error) {
+                showAlert(`Failed to start incremental sync: ${error.message}`, 'error');
+            }
+        }
+
+        async function triggerIdxSync() {
+            const jwtToken = document.getElementById('jwtToken').value;
+            if (!jwtToken) {
+                showAlert('Authentication required. Please provide a JWT token in Settings tab.', 'warning');
+                return;
+            }
+
+            try {
+                addLog('info', 'Starting IDX sync');
+                const result = await apiCall('/api/sync/idx', 'POST', { incremental: false });
+                showAlert('IDX sync started successfully!', 'success');
+                addLog('success', `IDX sync triggered: ${result.jobId}`);
+                setTimeout(refreshStatus, 2000);
+            } catch (error) {
+                showAlert(`Failed to start IDX sync: ${error.message}`, 'error');
+            }
+        }
+
+        async function triggerVowSync() {
+            const jwtToken = document.getElementById('jwtToken').value;
+            if (!jwtToken) {
+                showAlert('Authentication required. Please provide a JWT token in Settings tab.', 'warning');
+                return;
+            }
+
+            try {
+                addLog('info', 'Starting VOW sync');
+                const result = await apiCall('/api/sync/vow', 'POST', { incremental: false });
+                showAlert('VOW sync started successfully!', 'success');
+                addLog('success', `VOW sync triggered: ${result.jobId}`);
+                setTimeout(refreshStatus, 2000);
+            } catch (error) {
+                showAlert(`Failed to start VOW sync: ${error.message}`, 'error');
+            }
+        }
+
+        async function stopAllSyncs() {
+            const jwtToken = document.getElementById('jwtToken').value;
+            if (!jwtToken) {
+                showAlert('Authentication required. Please provide a JWT token in Settings tab.', 'warning');
+                return;
+            }
+
+            // Confirm before stopping
+            if (!confirm('Are you sure you want to stop all running sync operations? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                addLog('info', 'Stopping all sync operations...');
+                const result = await apiCall('/api/sync/stop-all', 'POST', {});
+                showAlert('All sync operations stopped successfully!', 'success');
+                addLog('success', `Stopped ${result.stoppedCount} sync operations`);
+                setTimeout(refreshStatus, 2000);
+            } catch (error) {
+                showAlert(`Failed to stop sync operations: ${error.message}`, 'error');
+            }
+        }
+
+        // Status Functions
+        async function refreshStatus() {
+            try {
+                // Get system health
+                const health = await apiCall('/health');
+                updateSystemStatus(health);
+                
+                // Get sync status
+                const syncStatus = await apiCall('/api/sync/status');
+                updateSyncStatus(syncStatus);
+                
+                // Get sync statistics
+                const stats = await apiCall('/api/sync/stats');
+                updateSyncStats(stats);
+                
+                addLog('info', 'Status refreshed successfully');
+                
+            } catch (error) {
+                addLog('error', `Failed to refresh status: ${error.message}`);
+                updateSystemStatus({ status: 'unhealthy' });
+            }
+        }
+
+        function updateSystemStatus(health) {
+            const serverStatus = document.getElementById('serverStatus');
+            const dbStatus = document.getElementById('dbStatus');
+            const cacheStatus = document.getElementById('cacheStatus');
+            
+            if (health.status === 'healthy') {
+                serverStatus.textContent = 'Healthy';
+                serverStatus.className = 'status-value status-healthy';
+            } else {
+                serverStatus.textContent = 'Unhealthy';
+                serverStatus.className = 'status-value status-error';
+            }
+            
+            if (health.services?.database?.status === 'healthy') {
+                dbStatus.textContent = 'Healthy';
+                dbStatus.className = 'status-value status-healthy';
+            } else {
+                dbStatus.textContent = 'Unhealthy';
+                dbStatus.className = 'status-value status-error';
+            }
+            
+            if (health.services?.cache?.status === 'healthy') {
+                cacheStatus.textContent = 'Healthy';
+                cacheStatus.className = 'status-value status-healthy';
+            } else {
+                cacheStatus.textContent = 'Unhealthy';
+                cacheStatus.className = 'status-value status-error';
+            }
+        }
+
+        function updateSyncStatus(syncStatus) {
+            const activeJobs = document.getElementById('activeJobs');
+            const activeJobsList = document.getElementById('activeJobsList');
+            
+            const activeCount = syncStatus.data?.active?.length || 0;
+            activeJobs.textContent = activeCount;
+            
+            if (activeCount > 0) {
+                activeJobs.className = 'status-value status-warning';
+                
+                // Update active jobs list
+                let jobsHtml = '';
+                syncStatus.data.active.forEach(job => {
+                    const duration = job.started_at ? 
+                        Math.round((Date.now() - new Date(job.started_at)) / 1000) : 0;
+                    jobsHtml += `
+                        <div class="status-item">
+                            <span class="status-label">${job.provider.toUpperCase()} ${job.type}</span>
+                            <span class="status-value status-warning">${job.status} (${duration}s)</span>
+                        </div>
+                    `;
+                });
+                activeJobsList.innerHTML = jobsHtml;
+            } else {
+                activeJobs.className = 'status-value status-healthy';
+                activeJobsList.innerHTML = '<p>No active jobs</p>';
+            }
+        }
+
+        function updateSyncStats(stats) {
+            const totalJobs = document.getElementById('totalJobs');
+            const successRate = document.getElementById('successRate');
+            const avgDuration = document.getElementById('avgDuration');
+            const totalRecords = document.getElementById('totalRecords');
+            
+            totalJobs.textContent = stats.data?.total || 0;
+            successRate.textContent = stats.data?.successRate ? `${stats.data.successRate.toFixed(1)}%` : '0%';
+            avgDuration.textContent = stats.data?.averageDuration ? 
+                `${Math.round(stats.data.averageDuration / 1000)}s` : '0s';
+            totalRecords.textContent = stats.data?.totalRecords?.processed || 0;
+        }
+
+        // Utility Functions
+        function addLog(type, message) {
+            const timestamp = new Date().toLocaleString();
+            const logEntry = {
+                timestamp,
+                type,
+                message
+            };
+            
+            logs.unshift(logEntry);
+            if (logs.length > 100) {
+                logs = logs.slice(0, 100);
+            }
+            
+            updateLogDisplay();
+        }
+
+        function updateLogDisplay() {
+            const logContainer = document.getElementById('logContainer');
+            const typeClasses = {
+                info: 'log-info',
+                success: 'log-success',
+                warning: 'log-warning',
+                error: 'log-error'
+            };
+            
+            let html = '';
+            logs.forEach(log => {
+                html += `
+                    <div class="log-entry">
+                        <span class="log-timestamp">[${log.timestamp}]</span>
+                        <span class="${typeClasses[log.type] || 'log-info'}">${log.message}</span>
+                    </div>
+                `;
+            });
+            
+            logContainer.innerHTML = html;
+        }
+
+        function clearLogs() {
+            logs = [];
+            updateLogDisplay();
+            addLog('info', 'Logs cleared');
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Settings Functions
+        function loadSettings() {
+            const apiBaseUrl = localStorage.getItem('syncDashboard_apiBaseUrl') || 'http://localhost:3000';
+            const jwtToken = localStorage.getItem('syncDashboard_jwtToken') || '';
+            const refreshInterval = localStorage.getItem('syncDashboard_refreshInterval') || '10';
+            
+            document.getElementById('apiBaseUrl').value = apiBaseUrl;
+            document.getElementById('jwtToken').value = jwtToken;
+            document.getElementById('refreshInterval').value = refreshInterval;
+        }
+
+        function saveSettings() {
+            const apiBaseUrl = document.getElementById('apiBaseUrl').value;
+            const jwtToken = document.getElementById('jwtToken').value;
+            const refreshInterval = document.getElementById('refreshInterval').value;
+            
+            localStorage.setItem('syncDashboard_apiBaseUrl', apiBaseUrl);
+            localStorage.setItem('syncDashboard_jwtToken', jwtToken);
+            localStorage.setItem('syncDashboard_refreshInterval', refreshInterval);
+            
+            showAlert('Settings saved successfully!', 'success');
+            addLog('info', 'Settings saved');
+            
+            // Check authentication status and update notice
+            checkAuthenticationStatus();
+            
+            // Restart auto-refresh with new interval
+            startAutoRefresh();
+        }
+
+        async function testConnection() {
+            try {
+                addLog('info', 'Testing connection...');
+                await apiCall('/health');
+                showAlert('Connection test successful!', 'success');
+                addLog('success', 'Connection test passed');
+            } catch (error) {
+                showAlert(`Connection test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            const interval = parseInt(document.getElementById('refreshInterval').value);
+            if (interval > 0) {
+                refreshInterval = setInterval(() => {
+                    refreshStatus();
+                    refreshStats();
+                    refreshProgress();
+                }, interval * 1000);
+                addLog('info', `Auto-refresh started (${interval}s interval)`);
+            }
+        }
+
+        function checkAuthenticationStatus() {
+            const jwtToken = document.getElementById('jwtToken').value;
+            const authNotice = document.getElementById('authNotice');
+            
+            if (!jwtToken) {
+                authNotice.style.display = 'block';
+            } else {
+                authNotice.style.display = 'none';
+            }
+        }
+
+        async function testSyncConnection() {
+            try {
+                addLog('info', 'Testing sync API connection...');
+                const result = await apiCall('/api/sync/test', 'GET');
+                showAlert('Sync API connection successful!', 'success');
+                addLog('success', `Sync API test: ${result.message}`);
+            } catch (error) {
+                showAlert(`Sync API connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function getJwtToken() {
+            try {
+                addLog('info', 'Opening Supabase authentication...');
+                
+                // Show login form
+                const email = prompt('Enter your email:');
+                if (!email) return;
+                
+                const password = prompt('Enter your password:');
+                if (!password) return;
+                
+                addLog('info', 'Authenticating with Supabase...');
+                const result = await apiCall('/auth/supabase/signin', 'POST', {
+                    email: email,
+                    password: password
+                });
+                
+                if (result.data && result.data.session) {
+                    // Auto-fill the access token in the settings
+                    document.getElementById('jwtToken').value = result.data.session.access_token;
+                    
+                    showAlert('Supabase authentication successful!', 'success');
+                    addLog('success', `Authenticated as: ${result.data.user.email}`);
+                    
+                    // Switch to settings tab to show the token
+                    switchTab('settings');
+                } else {
+                    throw new Error('No session data received');
+                }
+                
+            } catch (error) {
+                showAlert(`Supabase authentication failed: ${error.message}`, 'error');
+                addLog('error', `Authentication failed: ${error.message}`);
+            }
+        }
+
+        // Progress tracking functionality
+        let progressData = {
+            overallProgress: 0,
+            totalRecords: 0,
+            processedRecords: 0,
+            failedRecords: 0,
+            successRate: 0,
+            processingSpeed: 0,
+            currentPhase: 'idle',
+            phaseDescription: '',
+            dataSources: {
+                idx: { status: 'disconnected', records: 0 },
+                vow: { status: 'disconnected', records: 0 },
+                database: { status: 'disconnected', records: 0 }
+            },
+            tables: {},
+            errors: [],
+            startTime: null,
+            lastUpdate: null
+        };
+
+        // Initialize table progress cards
+        function initializeTableProgress() {
+            const tables = [
+                'common_fields',
+                'residential_freehold', 
+                'residential_condo',
+                'residential_lease',
+                'property_media',
+                'property_openhouse',
+                'property_rooms'
+            ];
+
+            const grid = document.getElementById('tableProgressGrid');
+            grid.innerHTML = '';
+
+            tables.forEach(tableName => {
+                const card = createTableProgressCard(tableName);
+                grid.appendChild(card);
+                progressData.tables[tableName] = {
+                    status: 'pending',
+                    fetched: 0,
+                    processed: 0,
+                    failed: 0,
+                    total: 0,
+                    progress: 0,
+                    errors: []
+                };
+            });
+        }
+
+        function createTableProgressCard(tableName) {
+            const card = document.createElement('div');
+            card.className = 'table-progress-card pending';
+            card.id = `table-${tableName}`;
+            
+            card.innerHTML = `
+                <div class="table-header">
+                    <div class="table-name">${tableName}</div>
+                    <div class="table-status status-pending">Pending</div>
+                </div>
+                <div class="table-progress-bar">
+                    <div class="table-progress-fill pending" style="width: 0%"></div>
+                </div>
+                <div class="table-details">
+                    <div class="table-detail">
+                        <span class="table-detail-label">Fetched:</span>
+                        <span class="table-detail-value" id="${tableName}-fetched">0</span>
+                    </div>
+                    <div class="table-detail">
+                        <span class="table-detail-label">Processed:</span>
+                        <span class="table-detail-value" id="${tableName}-processed">0</span>
+                    </div>
+                    <div class="table-detail">
+                        <span class="table-detail-label">Failed:</span>
+                        <span class="table-detail-value" id="${tableName}-failed">0</span>
+                    </div>
+                    <div class="table-detail">
+                        <span class="table-detail-label">Success Rate:</span>
+                        <span class="table-detail-value" id="${tableName}-success">0%</span>
+                    </div>
+                </div>
+                <div class="error-details" id="${tableName}-errors" style="display: none;"></div>
+            `;
+            
+            return card;
+        }
+
+        function updateProgressFromLogs() {
+            // Parse recent logs to extract progress information
+            const recentLogs = logs.slice(-50); // Last 50 log entries
+            
+            recentLogs.forEach(log => {
+                const message = log.message;
+                
+                // Parse sync progress from log messages
+                if (message.includes('📊') && message.includes('fetched')) {
+                    parseTableProgress(message);
+                }
+                
+                if (message.includes('✅') || message.includes('❌')) {
+                    parseTableResult(message);
+                }
+                
+                if (message.includes('🌐 Property:') || message.includes('🌐 Media:') || message.includes('🌐 OpenHouse:')) {
+                    parseDataSourceStatus(message);
+                }
+                
+                if (message.includes('retry') || message.includes('failed')) {
+                    parseErrorInfo(message);
+                }
+            });
+            
+            updateProgressDisplay();
+        }
+
+        function parseTableProgress(message) {
+            // Parse messages like "📊 common_fields: fetched 1000 records (skip=0)"
+            const match = message.match(/📊\s+(\w+):\s+fetched\s+(\d+)\s+records/);
+            if (match) {
+                const tableName = match[1];
+                const fetched = parseInt(match[2]);
+                
+                if (progressData.tables[tableName]) {
+                    progressData.tables[tableName].fetched = fetched;
+                    progressData.tables[tableName].status = 'in-progress';
+                }
+            }
+        }
+
+        function parseTableResult(message) {
+            // Parse messages like "✅ RES_FREEHOLD | Fetched: 1000 | Processed: 0 | Dropped: 1000 | Success: 0%"
+            const match = message.match(/(✅|❌)\s+(\w+)\s+\|\s+Fetched:\s+(\d+)\s+\|\s+Processed:\s+(\d+)\s+\|\s+Dropped:\s+(\d+)\s+\|\s+Success:\s+(\d+)%/);
+            if (match) {
+                const status = match[1] === '✅' ? 'completed' : 'failed';
+                const tableName = match[2].toLowerCase();
+                const fetched = parseInt(match[3]);
+                const processed = parseInt(match[4]);
+                const dropped = parseInt(match[5]);
+                const successRate = parseInt(match[6]);
+                
+                if (progressData.tables[tableName]) {
+                    progressData.tables[tableName].status = status;
+                    progressData.tables[tableName].fetched = fetched;
+                    progressData.tables[tableName].processed = processed;
+                    progressData.tables[tableName].failed = dropped;
+                    progressData.tables[tableName].progress = successRate;
+                }
+            }
+        }
+
+        function parseDataSourceStatus(message) {
+            // Parse data source status from log messages
+            if (message.includes('🌐 Property:')) {
+                progressData.dataSources.idx.status = 'connected';
+            }
+            if (message.includes('🌐 Media:') || message.includes('🌐 OpenHouse:')) {
+                progressData.dataSources.vow.status = 'connected';
+            }
+        }
+
+        function parseErrorInfo(message) {
+            // Parse error information
+            if (message.includes('❌') && message.includes('error:')) {
+                const errorMatch = message.match(/❌\s+(\w+)\s+error:\s+(.+)/);
+                if (errorMatch) {
+                    const tableName = errorMatch[1];
+                    const errorMessage = errorMatch[2];
+                    
+                    if (progressData.tables[tableName]) {
+                        progressData.tables[tableName].errors.push({
+                            message: errorMessage,
+                            timestamp: new Date()
+                        });
+                    }
+                }
+            }
+        }
+
+        function updateProgressDisplay() {
+            // Calculate overall progress
+            const totalTables = Object.keys(progressData.tables).length;
+            let completedTables = 0;
+            let totalFetched = 0;
+            let totalProcessed = 0;
+            let totalFailed = 0;
+            
+            Object.values(progressData.tables).forEach(table => {
+                if (table.status === 'completed') completedTables++;
+                totalFetched += table.fetched;
+                totalProcessed += table.processed;
+                totalFailed += table.failed;
+            });
+            
+            progressData.overallProgress = Math.round((completedTables / totalTables) * 100);
+            progressData.totalRecords = totalFetched;
+            progressData.processedRecords = totalProcessed;
+            progressData.failedRecords = totalFailed;
+            progressData.successRate = totalProcessed > 0 ? Math.round((totalProcessed / (totalProcessed + totalFailed)) * 100) : 0;
+            
+            // Update overall progress display
+            document.getElementById('overallProgress').textContent = `${progressData.overallProgress}%`;
+            document.getElementById('overallProgressBar').style.width = `${progressData.overallProgress}%`;
+            document.getElementById('totalRecords').textContent = progressData.totalRecords.toLocaleString();
+            document.getElementById('processedRecords').textContent = progressData.processedRecords.toLocaleString();
+            document.getElementById('successRate').textContent = `${progressData.successRate}%`;
+            
+            // Update real-time stats
+            document.getElementById('totalFetched').textContent = totalFetched.toLocaleString();
+            document.getElementById('totalProcessed').textContent = totalProcessed.toLocaleString();
+            document.getElementById('totalFailed').textContent = totalFailed.toLocaleString();
+            
+            // Update table progress cards
+            Object.entries(progressData.tables).forEach(([tableName, tableData]) => {
+                updateTableProgressCard(tableName, tableData);
+            });
+            
+            // Update data source status
+            updateDataSourceStatus();
+            
+            // Update last update time
+            progressData.lastUpdate = new Date();
+            document.getElementById('lastUpdate').textContent = progressData.lastUpdate.toLocaleTimeString();
+        }
+
+        function updateTableProgressCard(tableName, tableData) {
+            const card = document.getElementById(`table-${tableName}`);
+            if (!card) return;
+            
+            // Update card status
+            card.className = `table-progress-card ${tableData.status}`;
+            
+            // Update status badge
+            const statusBadge = card.querySelector('.table-status');
+            statusBadge.textContent = tableData.status.replace('-', ' ');
+            statusBadge.className = `table-status status-${tableData.status}`;
+            
+            // Update progress bar
+            const progressFill = card.querySelector('.table-progress-fill');
+            progressFill.style.width = `${tableData.progress}%`;
+            progressFill.className = `table-progress-fill ${tableData.status}`;
+            
+            // Update details
+            document.getElementById(`${tableName}-fetched`).textContent = tableData.fetched.toLocaleString();
+            document.getElementById(`${tableName}-processed`).textContent = tableData.processed.toLocaleString();
+            document.getElementById(`${tableName}-failed`).textContent = tableData.failed.toLocaleString();
+            
+            const successRate = tableData.processed > 0 ? Math.round((tableData.processed / (tableData.processed + tableData.failed)) * 100) : 0;
+            document.getElementById(`${tableName}-success`).textContent = `${successRate}%`;
+            
+            // Update errors
+            const errorContainer = document.getElementById(`${tableName}-errors`);
+            if (tableData.errors.length > 0) {
+                errorContainer.style.display = 'block';
+                errorContainer.innerHTML = tableData.errors.slice(-3).map(error => 
+                    `<div>${error.timestamp.toLocaleTimeString()}: ${error.message}</div>`
+                ).join('');
+            } else {
+                errorContainer.style.display = 'none';
+            }
+        }
+
+        function updateDataSourceStatus() {
+            // Update IDX status
+            const idxCard = document.getElementById('idxStatus');
+            const idxStatus = progressData.dataSources.idx.status;
+            idxCard.className = `data-source-card ${idxStatus}`;
+            document.getElementById('idxStatusText').textContent = idxStatus.charAt(0).toUpperCase() + idxStatus.slice(1);
+            
+            // Update VOW status
+            const vowCard = document.getElementById('vowStatus');
+            const vowStatus = progressData.dataSources.vow.status;
+            vowCard.className = `data-source-card ${vowStatus}`;
+            document.getElementById('vowStatusText').textContent = vowStatus.charAt(0).toUpperCase() + vowStatus.slice(1);
+            
+            // Update Database status
+            const dbCard = document.getElementById('dbStatus');
+            const dbStatus = progressData.dataSources.database.status;
+            dbCard.className = `data-source-card ${dbStatus}`;
+            document.getElementById('dbStatusText').textContent = dbStatus.charAt(0).toUpperCase() + dbStatus.slice(1);
+        }
+
+        function showCurrentPhase(title, description) {
+            progressData.currentPhase = title;
+            progressData.phaseDescription = description;
+            
+            document.getElementById('currentPhase').style.display = 'block';
+            document.getElementById('phaseTitle').textContent = title;
+            document.getElementById('phaseDescription').textContent = description;
+        }
+
+        function hideCurrentPhase() {
+            document.getElementById('currentPhase').style.display = 'none';
+        }
+
+        // Enhanced refresh function to include progress updates
+        function refreshProgress() {
+            updateProgressFromLogs();
+        }
+
+        // Initialize progress tracking when dashboard loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTableProgress();
+            refreshProgress();
+        });
+    </script>
+</body>
+</html>

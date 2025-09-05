@@ -1,38 +1,35 @@
-// mappers/mapPropertyMedia.js - RESO-compliant Media mapper
-export function mapPropertyMedia(item) {
+// mappers/mapPropertyMedia.js - Maps to property_media table
+
+export function mapPropertyMedia(idx = {}, vow = {}) {
+  const get = field => (vow[field] ?? idx[field] ?? null);
+
   return {
-    // === PRIMARY KEYS & IDENTIFIERS ===
-    MediaKey: item.MediaKey || null,                              // Primary key - unique media identifier
-    ResourceRecordKey: item.ResourceRecordKey || null,            // Foreign key to parent resource (e.g., ListingKey)
-    ResourceName: item.ResourceName || 'Property',                // Resource type (Property, Office, Member)
+    // === PRIMARY IDENTIFIERS ===
+    ListingKey:                 get('ListingKey') || get('ResourceRecordKey'), // ensure non-null
+    MediaKey:                   get('MediaKey'),
+    ResourceRecordKey:          get('ResourceRecordKey'),
     
-    // === CORE MEDIA FIELDS ===
-    MediaURL: item.MediaURL || null,                              // Media file URL
-    MediaType: item.MediaType || null,                            // Photo, Video, VirtualTour, Document, etc.
-    MediaCategory: item.MediaCategory || null,                    // Interior, Exterior, etc.
-    MediaStatus: item.MediaStatus || 'Active',                    // Active, Inactive, etc.
+    // === MEDIA DETAILS ===
+    MediaURL:                   get('MediaURL'),
+    MediaType:                  get('MediaType'),
+    MediaCategory:              get('MediaCategory'),
+    MediaStatus:                get('MediaStatus'),
+    MediaObjectID:              get('MediaObjectID'),
+    OriginatingSystemID:        get('OriginatingSystemID'),
     
-    // === DISPLAY & ORDERING ===
-    Order: item.Order ? parseInt(item.Order) : null,              // Display order (no preferred photo constraint)
+    // === MEDIA CLASSIFICATION ===
+    ClassName:                  get('ClassName'),
+    ImageOf:                    get('ImageOf'),
+    ImageSizeDescription:       get('ImageSizeDescription'),
+    ResourceName:               get('ResourceName') || 'Property',
     
-    // === DESCRIPTIONS ===
-    ShortDescription: item.ShortDescription || null,              // Brief media description
-    
-    // === CLASSIFICATION ===
-    ClassName: item.ClassName || null,                            // RESO class name (PascalCase)
-    ImageOf: item.ImageOf || null,                                // What the image shows
-    ImageSizeDescription: item.ImageSizeDescription || null,      // Small, Medium, Large, etc.
-    
-    // === SYSTEM IDENTIFIERS ===
-    MediaObjectID: item.MediaObjectID || null,                    // External media object ID
-    OriginatingSystemID: item.OriginatingSystemID || null,        // Source system identifier
+    // === MEDIA METADATA ===
+    ShortDescription:           get('ShortDescription'),
+    OrderNumber:                get('Order'),
+    PreferredPhotoYN:           get('PreferredPhotoYN') === 'Y' || get('PreferredPhotoYN') === true,
     
     // === TIMESTAMPS ===
-    ModificationTimestamp: item.ModificationTimestamp || null,    // Generic modification timestamp
-    MediaModificationTimestamp: item.MediaModificationTimestamp || null, // Media-specific modification timestamp
-    
-    // === METADATA ===
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    MediaModificationTimestamp: get('MediaModificationTimestamp'),
+    ModificationTimestamp:      get('ModificationTimestamp')
   };
 }

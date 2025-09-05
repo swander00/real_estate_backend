@@ -1,7 +1,13 @@
-// mappers/mapCommonFieldsRaw.js
-// Minimal mapper for common_fields showing raw feed values only
+// mappers/mapCommonFields.js
+// Mapper for common_fields table - maps feed data to database columns
 
 export function mapCommonFields(idx = {}, vow = {}) {
+  // Use the original field mapping that matches the database schema
+  return mapCommonFieldsLegacy(idx, vow);
+}
+
+// Legacy function for backward compatibility
+export function mapCommonFieldsLegacy(idx = {}, vow = {}) {
   const get = field => (vow[field] ?? idx[field] ?? null);
 
   return {

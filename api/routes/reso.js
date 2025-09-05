@@ -353,7 +353,7 @@ router.get('/Room', async (req, res, next) => {
 });
 
 // =============================================================================
-// Member Resource Endpoint (Placeholder - needs Member table)
+// Member Resource Endpoint
 // =============================================================================
 
 /**
@@ -362,23 +362,6 @@ router.get('/Room', async (req, res, next) => {
  */
 router.get('/Member', async (req, res, next) => {
   try {
-    // For now, return placeholder data since Member table doesn't exist yet
-    const placeholderMembers = [
-      {
-        MemberKey: 'PLACEHOLDER001',
-        MemberFirstName: 'John',
-        MemberLastName: 'Smith',
-        MemberFullName: 'John Smith',
-        MemberEmail: 'john.smith@example.com',
-        MemberPhone: '555-0123',
-        MemberType: 'Agent',
-        LicenseNumber: '12345',
-        MemberStatus: 'Active',
-        OfficeKey: 'OFFICE001',
-        ModificationTimestamp: new Date().toISOString()
-      }
-    ];
-
     // Parse OData query parameters
     const parsedQuery = parseODataQuery(req.query, {
       allowedFields: getAllowedFields('Member'),
@@ -387,12 +370,296 @@ router.get('/Member', async (req, res, next) => {
       defaultOrderDirection: 'asc'
     });
 
+    // Validate query
+    const validation = validateODataQuery(req.query);
+    if (!validation.isValid) {
+      return res.status(400).json(createODataErrorResponse(validation.errors, validation.warnings));
+    }
+
+    // Build base query - use users table with RESO Member field mapping
+    let query = supabase
+      .from('users')
+      .select(`
+        id as MemberKey,
+        email as MemberEmail,
+        first_name as MemberFirstName,
+        last_name as MemberLastName,
+        CONCAT(first_name, ' ', last_name) as MemberFullName,
+        phone as MemberPhone,
+        user_type as MemberType,
+        license_number as LicenseNumber,
+        status as MemberStatus,
+        office_key as OfficeKey,
+        updated_at as ModificationTimestamp
+      `);
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    // Execute query
+    const { data: members, error, count } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandMemberData(members, parsedQuery.expand);
+    }
+
     // Format response
     const response = {
       '@odata.context': '$metadata#Member',
-      value: placeholderMembers,
-      '@odata.count': placeholderMembers.length
+      value: members || [],
+      '@odata.count': count || members?.length || 0
     };
+
+    // Add OData next link if pagination is used
+    if (parsedQuery.top && members && members.length === parsedQuery.top) {
+      response['@odata.nextLink'] = `/api/reso/Member?$skip=${parsedQuery.skip + parsedQuery.top}&$top=${parsedQuery.top}`;
+    }
+
+    res.json(response);
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/reso/Member/:memberKey
+ * Get specific member by member key
+ */
+router.get('/Member/:memberKey', async (req, res, next) => {
+  try {
+    const { memberKey } = req.params;
+    
+    if (!memberKey) {
+      throw new ValidationError('Member key is required');
+    }
+
+    // Parse OData query parameters
+    const parsedQuery = parseODataQuery(req.query, {
+      allowedFields: getAllowedFields('Member'),
+      allowedExpandFields: getAllowedExpandFields('Member')
+    });
+
+    // Get member data
+    let query = supabase
+      .from('users')
+      .select(`
+        id as MemberKey,
+        email as MemberEmail,
+        first_name as MemberFirstName,
+        last_name as MemberLastName,
+        CONCAT(first_name, ' ', last_name) as MemberFullName,
+        phone as MemberPhone,
+        user_type as MemberType,
+        license_number as LicenseNumber,
+        status as MemberStatus,
+        office_key as OfficeKey,
+        updated_at as ModificationTimestamp
+      `)
+      .eq('id', memberKey)
+      .single();
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    const { data: member, error } = await query;
+
+    if (error || !member) {
+      throw new NotFoundError(`Member with key ${memberKey} not found`);
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandMemberData([member], parsedQuery.expand);
+    }
+
+    res.json({
+      '@odata.context': `$metadata#Member/$entity`,
+      ...member
+    });
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// Office Resource Endpoint
+// =============================================================================
+
+/**
+ * GET /api/reso/Office
+ * Get offices with OData query support
+ */
+router.get('/Office', async (req, res, next) => {
+  try {
+    // Parse OData query parameters
+    const parsedQuery = parseODataQuery(req.query, {
+      allowedFields: getAllowedFields('Office'),
+      allowedExpandFields: getAllowedExpandFields('Office'),
+      defaultOrderBy: 'OfficeName',
+      defaultOrderDirection: 'asc'
+    });
+
+    // Validate query
+    const validation = validateODataQuery(req.query);
+    if (!validation.isValid) {
+      return res.status(400).json(createODataErrorResponse(validation.errors, validation.warnings));
+    }
+
+    // Build base query
+    let query = supabase.from('offices').select('*');
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    // Execute query
+    const { data: offices, error, count } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandOfficeData(offices, parsedQuery.expand);
+    }
+
+    // Format response
+    const response = {
+      '@odata.context': '$metadata#Office',
+      value: offices || [],
+      '@odata.count': count || offices?.length || 0
+    };
+
+    // Add OData next link if pagination is used
+    if (parsedQuery.top && offices && offices.length === parsedQuery.top) {
+      response['@odata.nextLink'] = `/api/reso/Office?$skip=${parsedQuery.skip + parsedQuery.top}&$top=${parsedQuery.top}`;
+    }
+
+    res.json(response);
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/reso/Office/:officeKey
+ * Get specific office by office key
+ */
+router.get('/Office/:officeKey', async (req, res, next) => {
+  try {
+    const { officeKey } = req.params;
+    
+    if (!officeKey) {
+      throw new ValidationError('Office key is required');
+    }
+
+    // Parse OData query parameters
+    const parsedQuery = parseODataQuery(req.query, {
+      allowedFields: getAllowedFields('Office'),
+      allowedExpandFields: getAllowedExpandFields('Office')
+    });
+
+    // Get office data
+    let query = supabase
+      .from('offices')
+      .select('*')
+      .eq('OfficeKey', officeKey)
+      .single();
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    const { data: office, error } = await query;
+
+    if (error || !office) {
+      throw new NotFoundError(`Office with key ${officeKey} not found`);
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandOfficeData([office], parsedQuery.expand);
+    }
+
+    res.json({
+      '@odata.context': `$metadata#Office/$entity`,
+      ...office
+    });
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// PropertyHistory Resource Endpoint
+// =============================================================================
+
+/**
+ * GET /api/reso/PropertyHistory
+ * Get property history with OData query support
+ */
+router.get('/PropertyHistory', async (req, res, next) => {
+  try {
+    // Parse OData query parameters
+    const parsedQuery = parseODataQuery(req.query, {
+      allowedFields: getAllowedFields('PropertyHistory'),
+      allowedExpandFields: getAllowedExpandFields('PropertyHistory'),
+      defaultOrderBy: 'ChangeDate',
+      defaultOrderDirection: 'desc'
+    });
+
+    // Validate query
+    const validation = validateODataQuery(req.query);
+    if (!validation.isValid) {
+      return res.status(400).json(createODataErrorResponse(validation.errors, validation.warnings));
+    }
+
+    // Build base query - use property_history table if it exists, otherwise return empty
+    let query = supabase.from('property_history').select('*');
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    // Execute query
+    const { data: history, error, count } = await query;
+
+    if (error) {
+      // If table doesn't exist, return empty result
+      if (error.code === 'PGRST116') {
+        const response = {
+          '@odata.context': '$metadata#PropertyHistory',
+          value: [],
+          '@odata.count': 0
+        };
+        return res.json(response);
+      }
+      throw error;
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandPropertyHistoryData(history, parsedQuery.expand);
+    }
+
+    // Format response
+    const response = {
+      '@odata.context': '$metadata#PropertyHistory',
+      value: history || [],
+      '@odata.count': count || history?.length || 0
+    };
+
+    // Add OData next link if pagination is used
+    if (parsedQuery.top && history && history.length === parsedQuery.top) {
+      response['@odata.nextLink'] = `/api/reso/PropertyHistory?$skip=${parsedQuery.skip + parsedQuery.top}&$top=${parsedQuery.top}`;
+    }
 
     res.json(response);
 
@@ -402,49 +669,193 @@ router.get('/Member', async (req, res, next) => {
 });
 
 // =============================================================================
-// Office Resource Endpoint (Placeholder - needs Office table)
+// PropertyFeatures Resource Endpoint
 // =============================================================================
 
 /**
- * GET /api/reso/Office
- * Get offices with OData query support
+ * GET /api/reso/PropertyFeatures
+ * Get property features with OData query support
  */
-router.get('/Office', async (req, res, next) => {
+router.get('/PropertyFeatures', async (req, res, next) => {
   try {
-    // For now, return placeholder data since Office table doesn't exist yet
-    const placeholderOffices = [
-      {
-        OfficeKey: 'OFFICE001',
-        OfficeName: 'Century 21 Real Estate',
-        OfficeAddress1: '123 Main Street',
-        OfficeCity: 'Toronto',
-        OfficeState: 'ON',
-        OfficePostalCode: 'M5V 3A8',
-        OfficePhone: '416-555-0123',
-        OfficeEmail: 'info@century21toronto.com',
-        OfficeWebsite: 'https://century21toronto.com',
-        OfficeLicenseNumber: 'LIC001',
-        OfficeType: 'Brokerage',
-        ModificationTimestamp: new Date().toISOString()
-      }
-    ];
-
     // Parse OData query parameters
     const parsedQuery = parseODataQuery(req.query, {
-      allowedFields: getAllowedFields('Office'),
-      allowedExpandFields: getAllowedExpandFields('Office'),
-      defaultOrderBy: 'OfficeName',
+      allowedFields: getAllowedFields('PropertyFeatures'),
+      allowedExpandFields: getAllowedExpandFields('PropertyFeatures'),
+      defaultOrderBy: 'FeatureName',
       defaultOrderDirection: 'asc'
     });
 
+    // Validate query
+    const validation = validateODataQuery(req.query);
+    if (!validation.isValid) {
+      return res.status(400).json(createODataErrorResponse(validation.errors, validation.warnings));
+    }
+
+    // Build base query - use property_features table if it exists, otherwise return empty
+    let query = supabase.from('property_features').select('*');
+
+    // Apply OData parameters
+    query = applyODataToSupabase(query, parsedQuery);
+
+    // Execute query
+    const { data: features, error, count } = await query;
+
+    if (error) {
+      // If table doesn't exist, return empty result
+      if (error.code === 'PGRST116') {
+        const response = {
+          '@odata.context': '$metadata#PropertyFeatures',
+          value: [],
+          '@odata.count': 0
+        };
+        return res.json(response);
+      }
+      throw error;
+    }
+
+    // Handle $expand for related data
+    if (parsedQuery.expand.length > 0) {
+      await expandPropertyFeaturesData(features, parsedQuery.expand);
+    }
+
     // Format response
     const response = {
-      '@odata.context': '$metadata#Office',
-      value: placeholderOffices,
-      '@odata.count': placeholderOffices.length
+      '@odata.context': '$metadata#PropertyFeatures',
+      value: features || [],
+      '@odata.count': count || features?.length || 0
     };
 
+    // Add OData next link if pagination is used
+    if (parsedQuery.top && features && features.length === parsedQuery.top) {
+      response['@odata.nextLink'] = `/api/reso/PropertyFeatures?$skip=${parsedQuery.skip + parsedQuery.top}&$top=${parsedQuery.top}`;
+    }
+
     res.json(response);
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// Batch Endpoint (OData Batch Processing)
+// =============================================================================
+
+/**
+ * POST /api/reso/$batch
+ * OData batch processing endpoint
+ */
+router.post('/$batch', async (req, res, next) => {
+  try {
+    const contentType = req.get('Content-Type') || '';
+    
+    if (!contentType.includes('multipart/mixed')) {
+      return res.status(400).json({
+        error: {
+          code: 'BadRequest',
+          message: 'Batch requests must use multipart/mixed content type'
+        }
+      });
+    }
+
+    // For now, return a simple response indicating batch processing is not fully implemented
+    res.status(501).json({
+      error: {
+        code: 'NotImplemented',
+        message: 'Batch processing is not yet fully implemented. Individual requests should be used instead.'
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =============================================================================
+// Search Endpoint (OData Search)
+// =============================================================================
+
+/**
+ * GET /api/reso/$search
+ * OData search endpoint for cross-entity searching
+ */
+router.get('/$search', async (req, res, next) => {
+  try {
+    const { $search: searchTerm } = req.query;
+    
+    if (!searchTerm) {
+      return res.status(400).json({
+        error: {
+          code: 'BadRequest',
+          message: 'Search term is required'
+        }
+      });
+    }
+
+    // Parse OData query parameters
+    const parsedQuery = parseODataQuery(req.query, {
+      allowedFields: ['*'], // Allow all fields for search
+      allowedExpandFields: [],
+      defaultOrderBy: 'ModificationTimestamp',
+      defaultOrderDirection: 'desc'
+    });
+
+    // Search across multiple entities
+    const searchResults = {
+      '@odata.context': '$metadata#SearchResults',
+      value: []
+    };
+
+    // Search in Properties
+    const { data: properties } = await supabase
+      .from('common_fields')
+      .select('*')
+      .or(`PublicRemarks.ilike.%${searchTerm}%,City.ilike.%${searchTerm}%,UnparsedAddress.ilike.%${searchTerm}%`)
+      .limit(10);
+
+    if (properties && properties.length > 0) {
+      searchResults.value.push({
+        '@odata.type': 'RESO.RealEstate.Property',
+        results: properties
+      });
+    }
+
+    // Search in Members
+    const { data: members } = await supabase
+      .from('users')
+      .select(`
+        id as MemberKey,
+        email as MemberEmail,
+        first_name as MemberFirstName,
+        last_name as MemberLastName,
+        CONCAT(first_name, ' ', last_name) as MemberFullName
+      `)
+      .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+      .limit(5);
+
+    if (members && members.length > 0) {
+      searchResults.value.push({
+        '@odata.type': 'RESO.RealEstate.Member',
+        results: members
+      });
+    }
+
+    // Search in Offices
+    const { data: offices } = await supabase
+      .from('offices')
+      .select('*')
+      .or(`OfficeName.ilike.%${searchTerm}%,OfficeCity.ilike.%${searchTerm}%`)
+      .limit(5);
+
+    if (offices && offices.length > 0) {
+      searchResults.value.push({
+        '@odata.type': 'RESO.RealEstate.Office',
+        results: offices
+      });
+    }
+
+    res.json(searchResults);
 
   } catch (error) {
     next(error);
@@ -572,6 +983,119 @@ async function expandRoomData(rooms, expandFields) {
 }
 
 /**
+ * Expand member data with related resources
+ * @param {Array} members - Array of member objects
+ * @param {Array} expandFields - Fields to expand
+ */
+async function expandMemberData(members, expandFields) {
+  for (const member of members) {
+    const memberKey = member.MemberKey;
+    const officeKey = member.OfficeKey;
+    
+    for (const expandField of expandFields) {
+      switch (expandField) {
+        case 'Office':
+          if (officeKey) {
+            const { data: office } = await supabase
+              .from('offices')
+              .select('*')
+              .eq('OfficeKey', officeKey)
+              .single();
+            member.Office = office || null;
+          }
+          break;
+          
+        case 'Property':
+          // Get properties associated with this member
+          const { data: properties } = await supabase
+            .from('common_fields')
+            .select('*')
+            .eq('ListingAgentKey', memberKey);
+          member.Property = properties || [];
+          break;
+      }
+    }
+  }
+}
+
+/**
+ * Expand office data with related resources
+ * @param {Array} offices - Array of office objects
+ * @param {Array} expandFields - Fields to expand
+ */
+async function expandOfficeData(offices, expandFields) {
+  for (const office of offices) {
+    const officeKey = office.OfficeKey;
+    
+    for (const expandField of expandFields) {
+      if (expandField === 'Member') {
+        const { data: members } = await supabase
+          .from('users')
+          .select(`
+            id as MemberKey,
+            email as MemberEmail,
+            first_name as MemberFirstName,
+            last_name as MemberLastName,
+            CONCAT(first_name, ' ', last_name) as MemberFullName,
+            phone as MemberPhone,
+            user_type as MemberType,
+            license_number as LicenseNumber,
+            status as MemberStatus,
+            office_key as OfficeKey,
+            updated_at as ModificationTimestamp
+          `)
+          .eq('office_key', officeKey);
+        office.Member = members || [];
+      }
+    }
+  }
+}
+
+/**
+ * Expand property history data with related resources
+ * @param {Array} history - Array of property history objects
+ * @param {Array} expandFields - Fields to expand
+ */
+async function expandPropertyHistoryData(history, expandFields) {
+  for (const historyItem of history) {
+    const listingKey = historyItem.ListingKey;
+    
+    for (const expandField of expandFields) {
+      if (expandField === 'Property') {
+        const { data: property } = await supabase
+          .from('common_fields')
+          .select('*')
+          .eq('ListingKey', listingKey)
+          .single();
+        historyItem.Property = property || null;
+      }
+    }
+  }
+}
+
+/**
+ * Expand property features data with related resources
+ * @param {Array} features - Array of property features objects
+ * @param {Array} expandFields - Fields to expand
+ */
+async function expandPropertyFeaturesData(features, expandFields) {
+  for (const feature of features) {
+    const listingKey = feature.ListingKey;
+    
+    for (const expandField of expandFields) {
+      if (expandField === 'Property') {
+        const { data: property } = await supabase
+          .from('common_fields')
+          .select('*')
+          .eq('ListingKey', listingKey)
+          .single();
+        feature.Property = property || null;
+      }
+    }
+  }
+}
+
+/**
  * Convert metadata to XML format (basic implementation)
  * @param {Object} metadata - Metadata object
  * @returns {string} XML string
@@ -603,10 +1127,48 @@ function convertMetadataToXML(metadata) {
   xml += '        <Property Name="OpenHouseDate" Type="Edm.Date" Nullable="true" />\n';
   xml += '      </EntityType>\n';
   
+  xml += '      <EntityType Name="Room">\n';
+  xml += '        <Key><PropertyRef Name="RoomKey" /></Key>\n';
+  xml += '        <Property Name="RoomKey" Type="Edm.String" Nullable="false" />\n';
+  xml += '        <Property Name="RoomType" Type="Edm.String" Nullable="true" />\n';
+  xml += '      </EntityType>\n';
+  
+  xml += '      <EntityType Name="Member">\n';
+  xml += '        <Key><PropertyRef Name="MemberKey" /></Key>\n';
+  xml += '        <Property Name="MemberKey" Type="Edm.String" Nullable="false" />\n';
+  xml += '        <Property Name="MemberFirstName" Type="Edm.String" Nullable="true" />\n';
+  xml += '        <Property Name="MemberLastName" Type="Edm.String" Nullable="true" />\n';
+  xml += '      </EntityType>\n';
+  
+  xml += '      <EntityType Name="Office">\n';
+  xml += '        <Key><PropertyRef Name="OfficeKey" /></Key>\n';
+  xml += '        <Property Name="OfficeKey" Type="Edm.String" Nullable="false" />\n';
+  xml += '        <Property Name="OfficeName" Type="Edm.String" Nullable="true" />\n';
+  xml += '      </EntityType>\n';
+  
+  xml += '      <EntityType Name="PropertyHistory">\n';
+  xml += '        <Key><PropertyRef Name="HistoryKey" /></Key>\n';
+  xml += '        <Property Name="HistoryKey" Type="Edm.String" Nullable="false" />\n';
+  xml += '        <Property Name="ChangeType" Type="Edm.String" Nullable="true" />\n';
+  xml += '        <Property Name="ChangeDate" Type="Edm.DateTimeOffset" Nullable="true" />\n';
+  xml += '      </EntityType>\n';
+  
+  xml += '      <EntityType Name="PropertyFeatures">\n';
+  xml += '        <Key><PropertyRef Name="FeatureKey" /></Key>\n';
+  xml += '        <Property Name="FeatureKey" Type="Edm.String" Nullable="false" />\n';
+  xml += '        <Property Name="FeatureName" Type="Edm.String" Nullable="true" />\n';
+  xml += '        <Property Name="FeatureValue" Type="Edm.String" Nullable="true" />\n';
+  xml += '      </EntityType>\n';
+  
   xml += '      <EntityContainer Name="RealEstateContainer">\n';
   xml += '        <EntitySet Name="Property" EntityType="RESO.RealEstate.Property" />\n';
   xml += '        <EntitySet Name="Media" EntityType="RESO.RealEstate.Media" />\n';
   xml += '        <EntitySet Name="OpenHouse" EntityType="RESO.RealEstate.OpenHouse" />\n';
+  xml += '        <EntitySet Name="Room" EntityType="RESO.RealEstate.Room" />\n';
+  xml += '        <EntitySet Name="Member" EntityType="RESO.RealEstate.Member" />\n';
+  xml += '        <EntitySet Name="Office" EntityType="RESO.RealEstate.Office" />\n';
+  xml += '        <EntitySet Name="PropertyHistory" EntityType="RESO.RealEstate.PropertyHistory" />\n';
+  xml += '        <EntitySet Name="PropertyFeatures" EntityType="RESO.RealEstate.PropertyFeatures" />\n';
   xml += '      </EntityContainer>\n';
   
   xml += '    </Schema>\n';

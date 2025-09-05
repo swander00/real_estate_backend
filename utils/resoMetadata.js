@@ -21,7 +21,9 @@ export function generateRESOMetadata() {
             generateOpenHouseEntityType(),
             generateRoomEntityType(),
             generateMemberEntityType(),
-            generateOfficeEntityType()
+            generateOfficeEntityType(),
+            generatePropertyHistoryEntityType(),
+            generatePropertyFeaturesEntityType()
           ],
           entityContainer: [{
             name: "RealEstateContainer",
@@ -31,7 +33,9 @@ export function generateRESOMetadata() {
               { name: "OpenHouse", entityType: "RESO.RealEstate.OpenHouse" },
               { name: "Room", entityType: "RESO.RealEstate.Room" },
               { name: "Member", entityType: "RESO.RealEstate.Member" },
-              { name: "Office", entityType: "RESO.RealEstate.Office" }
+              { name: "Office", entityType: "RESO.RealEstate.Office" },
+              { name: "PropertyHistory", entityType: "RESO.RealEstate.PropertyHistory" },
+              { name: "PropertyFeatures", entityType: "RESO.RealEstate.PropertyFeatures" }
             ]
           }]
         }]
@@ -251,6 +255,53 @@ function generateOfficeEntityType() {
 }
 
 /**
+ * Generate PropertyHistory entity type definition
+ * @returns {Object} PropertyHistory entity type
+ */
+function generatePropertyHistoryEntityType() {
+  return {
+    name: "PropertyHistory",
+    key: [{ name: "HistoryKey" }],
+    property: [
+      { name: "HistoryKey", type: "Edm.String", nullable: false },
+      { name: "ListingKey", type: "Edm.String", nullable: true },
+      { name: "ChangeType", type: "Edm.String", nullable: true },
+      { name: "OldValue", type: "Edm.String", nullable: true },
+      { name: "NewValue", type: "Edm.String", nullable: true },
+      { name: "ChangeDate", type: "Edm.DateTimeOffset", nullable: true },
+      { name: "ChangeSource", type: "Edm.String", nullable: true },
+      { name: "ModificationTimestamp", type: "Edm.DateTimeOffset", nullable: true }
+    ],
+    navigationProperty: [
+      { name: "Property", type: "RESO.RealEstate.Property" }
+    ]
+  };
+}
+
+/**
+ * Generate PropertyFeatures entity type definition
+ * @returns {Object} PropertyFeatures entity type
+ */
+function generatePropertyFeaturesEntityType() {
+  return {
+    name: "PropertyFeatures",
+    key: [{ name: "FeatureKey" }],
+    property: [
+      { name: "FeatureKey", type: "Edm.String", nullable: false },
+      { name: "ListingKey", type: "Edm.String", nullable: true },
+      { name: "FeatureName", type: "Edm.String", nullable: true },
+      { name: "FeatureValue", type: "Edm.String", nullable: true },
+      { name: "FeatureCategory", type: "Edm.String", nullable: true },
+      { name: "FeatureDescription", type: "Edm.String", nullable: true },
+      { name: "ModificationTimestamp", type: "Edm.DateTimeOffset", nullable: true }
+    ],
+    navigationProperty: [
+      { name: "Property", type: "RESO.RealEstate.Property" }
+    ]
+  };
+}
+
+/**
  * Get allowed fields for a specific resource
  * @param {string} resourceName - Name of the resource
  * @returns {Array} Array of allowed field names
@@ -293,6 +344,14 @@ export function getAllowedFields(resourceName) {
       'OfficeCity', 'OfficeState', 'OfficePostalCode', 'OfficePhone',
       'OfficeEmail', 'OfficeWebsite', 'OfficeLicenseNumber', 'OfficeType',
       'ModificationTimestamp'
+    ],
+    PropertyHistory: [
+      'HistoryKey', 'ListingKey', 'ChangeType', 'OldValue', 'NewValue',
+      'ChangeDate', 'ChangeSource', 'ModificationTimestamp'
+    ],
+    PropertyFeatures: [
+      'FeatureKey', 'ListingKey', 'FeatureName', 'FeatureValue',
+      'FeatureCategory', 'FeatureDescription', 'ModificationTimestamp'
     ]
   };
 
@@ -311,7 +370,9 @@ export function getAllowedExpandFields(resourceName) {
     OpenHouse: ['Property'],
     Room: ['Property'],
     Member: ['Office', 'Property'],
-    Office: ['Member']
+    Office: ['Member'],
+    PropertyHistory: ['Property'],
+    PropertyFeatures: ['Property']
   };
 
   return expandMaps[resourceName] || [];
@@ -354,6 +415,16 @@ export function createServiceDocument() {
         name: "Office",
         kind: "EntitySet",
         url: "Office"
+      },
+      {
+        name: "PropertyHistory",
+        kind: "EntitySet",
+        url: "PropertyHistory"
+      },
+      {
+        name: "PropertyFeatures",
+        kind: "EntitySet",
+        url: "PropertyFeatures"
       }
     ]
   };
