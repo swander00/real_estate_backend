@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Estate Backend Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online { background: #10b981; }
+        .status-dot.offline { background: #ef4444; }
+        .status-dot.syncing { background: #f59e0b; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sync-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .progress-section {
+            margin-top: 1.5rem;
+        }
+
+        .progress-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #e5e7eb;
+        }
+
+        .progress-item.active {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .progress-item.completed {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .progress-item.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .progress-status {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .progress-status.pending { background: #f3f4f6; color: #6b7280; }
+        .progress-status.active { background: #dbeafe; color: #1d4ed8; }
+        .progress-status.completed { background: #d1fae5; color: #065f46; }
+        .progress-status.error { background: #fee2e2; color: #991b1b; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.completed {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .progress-fill.error {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .progress-details {
+            font-size: 0.875rem;
+            color: #6b7280;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .storage-section {
+            margin-top: 1.5rem;
+        }
+
+        .storage-bar {
+            width: 100%;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .storage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .storage-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .storage-fill.danger {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .log-section {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1.5rem;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+
+        .log-entry.info { color: #60a5fa; }
+        .log-entry.success { color: #34d399; }
+        .log-entry.warning { color: #fbbf24; }
+        .log-entry.error { color: #f87171; }
+
+        .log-timestamp {
+            color: #9ca3af;
+            margin-right: 0.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .completion-status {
+            padding: 1rem;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        .completion-status.complete {
+            background: #ecfdf5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .completion-status.partial {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .completion-status.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .feed-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .feed-status-item {
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #f3f4f6;
+            border-left: 4px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        .feed-status-item.has-data {
+            background: #dbeafe;
+            border-left-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .feed-status-item.complete {
+            background: #d1fae5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        .feed-status-item.api-limit {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .feed-status-item.error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .feed-status-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .feed-status-details {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sync-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Real Estate Backend Dashboard</h1>
+            <p>Manage your MLS data synchronization and monitor system performance</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot online" id="systemStatus"></div>
+                <span>System Online</span>
+            </div>
+            <div class="status-item">
+                <span>Last Sync: <span id="lastUpdated">Never</span></span>
+            </div>
+            <div class="status-item">
+                <span>Active Syncs: <span id="activeSyncs">0</span></span>
+            </div>
+            <div class="status-item">
+                <span>Status: <span id="syncStatus">Idle</span></span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Sync Controls -->
+            <div class="card">
+                <h2>🔄 Sync Operations</h2>
+                
+                <div class="sync-controls">
+                    <button class="btn btn-primary" id="syncIdxBtn" onclick="startSync('idx')">
+                        <span class="btn-text">Sync IDX</span>
+                        <div class="loading hidden" id="idxLoading"></div>
+                    </button>
+                    <button class="btn btn-primary" id="syncVowBtn" onclick="startSync('vow')">
+                        <span class="btn-text">Sync VOW</span>
+                        <div class="loading hidden" id="vowLoading"></div>
+                    </button>
+                    <button class="btn btn-secondary" id="syncAllBtn" onclick="startSync('all')">
+                        <span class="btn-text">Sync All</span>
+                        <div class="loading hidden" id="allLoading"></div>
+                    </button>
+                    <button class="btn btn-danger" id="stopSyncBtn" onclick="stopSync()" disabled>
+                        <span class="btn-text">Stop Sync</span>
+                    </button>
+                    <button class="btn btn-danger" id="resetSyncBtn" onclick="resetSync()" style="background: #dc2626;">
+                        <span class="btn-text">Reset All</span>
+                    </button>
+                </div>
+
+                <div class="progress-section" id="progressSection" style="display: none;">
+                    <h3>Sync Progress</h3>
+                    <div id="progressContainer"></div>
+                </div>
+            </div>
+
+            <!-- Database Statistics -->
+            <div class="card">
+                <h2>📊 Database Statistics</h2>
+                
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalProperties">-</div>
+                        <div class="stat-label">Total Properties</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalMedia">-</div>
+                        <div class="stat-label">Media Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalOpenHouses">-</div>
+                        <div class="stat-label">Open Houses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lastSyncTime">-</div>
+                        <div class="stat-label">Last Sync</div>
+                    </div>
+                </div>
+
+                <!-- Sync Completion Status -->
+                <div class="sync-completion-section" style="margin-top: 1.5rem;">
+                    <h3>🔄 Sync Completion Status</h3>
+                    <div id="completionStatus" class="completion-status">
+                        <div class="loading"></div>
+                        <span>Checking feed status...</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="checkFeedCompletion()" style="margin-top: 1rem; width: 100%;">
+                        🔍 Check Feed Completion
+                    </button>
+                </div>
+
+                <div class="storage-section">
+                    <h3>Storage Usage</h3>
+                    <div class="storage-bar">
+                        <div class="storage-fill" id="storageFill" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #6b7280;">
+                        <span id="storageUsed">0 MB</span>
+                        <span id="storageLimit">Unknown</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Logs -->
+            <div class="card full-width">
+                <h2>📝 System Logs</h2>
+                <div class="log-section" id="logContainer">
+                    <div class="log-entry info">
+                        <span class="log-timestamp">[00:00:00]</span>
+                        Dashboard initialized
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="clearLogs()" style="margin-top: 1rem;">
+                    Clear Logs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let syncState = {
+            active: false,
+            type: null,
+            progress: {},
+            startTime: null
+        };
+
+        let statsInterval;
+        let progressInterval;
+        let lastSyncTimestamp = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDatabaseStats();
+            startStatsRefresh();
+            checkSyncStatus(); // Check if sync is already running
+            checkFeedCompletion(); // Check feed completion status
+            addLog('info', 'Dashboard initialized and ready');
+        });
+
+        // Check current sync status from backend
+        async function checkSyncStatus() {
+            try {
+                const response = await fetch('/api/sync/progress');
+                if (response.ok) {
+                    const status = await response.json();
+                    syncState.active = status.active;
+                    syncState.type = status.type;
+                    syncState.startTime = status.startTime ? new Date(status.startTime) : null;
+                    syncState.progress = status.progress || {};
+                    
+                    updateSyncButtons(syncState.active);
+                    updateActiveSyncsCount();
+                    updateLastSyncTimestamp();
+                    
+                    if (syncState.active) {
+                        showProgressSection();
+                        startProgressMonitoring();
+                        addLog('info', `Detected active ${syncState.type?.toUpperCase()} sync`);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to check sync status:', error);
+            }
+        }
+
+        // Sync operations
+        async function startSync(type) {
+            if (syncState.active) {
+                addLog('warning', 'Sync already in progress');
+                return;
+            }
+
+            try {
+                // Show loading state immediately
+                showButtonLoading(type, true);
+                addLog('info', `Starting ${type.toUpperCase()} sync...`);
+
+                const response = await fetch('/api/sync/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                addLog('success', `Sync started successfully: ${result.message}`);
+
+                // Update state after successful start
+                syncState.active = true;
+                syncState.type = type;
+                syncState.startTime = new Date();
+                syncState.progress = {};
+                lastSyncTimestamp = syncState.startTime;
+
+                updateSyncButtons(true);
+                showProgressSection();
+                updateActiveSyncsCount();
+                updateLastSyncTimestamp();
+
+                // Start progress monitoring
+                startProgressMonitoring();
+
+            } catch (error) {
+                addLog('error', `Failed to start sync: ${error.message}`);
+                showButtonLoading(type, false);
+                syncState.active = false;
+                updateSyncButtons(false);
+                updateActiveSyncsCount();
+            }
+        }
+
+        async function stopSync() {
+            if (!syncState.active) return;
+
+            try {
+                addLog('warning', 'Stopping sync...');
+                
+                const response = await fetch('/api/sync/stop', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    addLog('warning', 'Sync stop requested');
+                    syncState.active = false;
+                    updateSyncButtons(false);
+                    updateActiveSyncsCount();
+                    stopProgressMonitoring();
+                    
+                    // Hide progress section after a brief delay
+                    setTimeout(() => {
+                        if (!syncState.active) {
+                            document.getElementById('progressSection').style.display = 'none';
+                        }
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to stop sync');
+                }
+            } catch (error) {
+                addLog('error', `Failed to stop sync: ${error.message}`);
+            }
+        }
+
+        async function resetSync() {
+            if (confirm('Are you sure you want to reset all sync operations? This will forcefully stop any running processes.')) {
+                try {
+                    const response = await fetch('/api/sync/reset', {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        addLog('warning', 'Sync state reset - all processes terminated');
+                        syncState.active = false;
+                        syncState.type = null;
+                        syncState.startTime = null;
+                        syncState.progress = {};
+                        
+                        updateSyncButtons(false);
+                        updateActiveSyncsCount();
+                        stopProgressMonitoring();
+                        
+                        // Clear progress display
+                        document.getElementById('progressSection').style.display = 'none';
+                        document.getElementById('progressContainer').innerHTML = '';
+                        
+                        // Reset all button loading states
+                        showButtonLoading('idx', false);
+                        showButtonLoading('vow', false);
+                        showButtonLoading('all', false);
+                    } else {
+                        throw new Error('Failed to reset sync state');
+                    }
+                } catch (error) {
+                    addLog('error', `Failed to reset sync: ${error.message}`);
+                }
+            }
+        }
+
+        // Progress monitoring
+        function startProgressMonitoring() {
+            progressInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/sync/progress');
+                    if (response.ok) {
+                        const progress = await response.json();
+                        
+                        // Update sync state from backend
+                        syncState.active = progress.active;
+                        syncState.type = progress.type;
+                        syncState.startTime = progress.startTime ? new Date(progress.startTime) : null;
+                        syncState.progress = progress.progress || {};
+                        
+                        updateProgress(progress);
+                        updateActiveSyncsCount();
+                        
+                        if (!progress.active || progress.progress?.completed) {
+                            syncState.active = false;
+                            updateSyncButtons(false);
+                            stopProgressMonitoring();
+                            updateActiveSyncsCount();
+                            
+                            if (progress.progress?.completed) {
+                                addLog('success', 'Sync completed successfully');
+                                loadDatabaseStats(); // Refresh stats
+                            } else if (progress.progress?.error) {
+                                addLog('error', `Sync failed: ${progress.progress.error}`);
+                            }
+                            
+                            // Hide progress section after completion
+                            setTimeout(() => {
+                                if (!syncState.active) {
+                                    document.getElementById('progressSection').style.display = 'none';
+                                }
+                            }, 3000);
+                        }
+                    }
+                } catch (error) {
+                    addLog('error', `Progress monitoring error: ${error.message}`);
+                }
+            }, 2000);
+        }
+
+        function stopProgressMonitoring() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function updateProgress(progress) {
+            const container = document.getElementById('progressContainer');
+            container.innerHTML = '';
+
+            if (progress.progress && progress.progress.tables && progress.progress.tables.length > 0) {
+                progress.progress.tables.forEach(table => {
+                    const progressItem = createProgressItem(table);
+                    container.appendChild(progressItem);
+                });
+            } else if (progress.active) {
+                // Show a simple "Running..." indicator if no detailed progress
+                const runningItem = document.createElement('div');
+                runningItem.className = 'progress-item active';
+                runningItem.innerHTML = `
+                    <div class="progress-header">
+                        <span class="progress-title">${progress.type?.toUpperCase() || 'SYNC'} Operation</span>
+                        <span class="progress-status active">Running</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill active" style="width: 50%"></div>
+                    </div>
+                    <div class="progress-details">
+                        <span>Sync in progress...</span>
+                        <span>${progress.duration ? Math.round(progress.duration / 1000) + 's' : '0s'}</span>
+                    </div>
+                `;
+                container.appendChild(runningItem);
+            }
+        }
+
+        function createProgressItem(table) {
+            const div = document.createElement('div');
+            div.className = `progress-item ${table.status}`;
+            
+            const percentage = table.total > 0 ? Math.round((table.processed / table.total) * 100) : 0;
+            
+            div.innerHTML = `
+                <div class="progress-header">
+                    <span class="progress-title">${table.name}</span>
+                    <span class="progress-status ${table.status}">${table.status}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill ${table.status}" style="width: ${percentage}%"></div>
+                </div>
+                <div class="progress-details">
+                    <span>${table.processed} / ${table.total} records</span>
+                    <span>${percentage}%</span>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function showProgressSection() {
+            document.getElementById('progressSection').style.display = 'block';
+        }
+
+        // Database statistics
+        async function loadDatabaseStats() {
+            try {
+                const response = await fetch('/api/stats/database');
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateStatsDisplay(stats);
+                }
+            } catch (error) {
+                addLog('error', `Failed to load database stats: ${error.message}`);
+            }
+        }
+
+        function updateStatsDisplay(stats) {
+            document.getElementById('totalProperties').textContent = stats.properties || 0;
+            document.getElementById('totalMedia').textContent = stats.media || 0;
+            document.getElementById('totalOpenHouses').textContent = stats.openHouses || 0;
+            document.getElementById('lastSyncTime').textContent = stats.lastSync || 'Never';
+            
+            // Update storage usage
+            if (stats.storage) {
+                const percentage = (stats.storage.used / stats.storage.limit) * 100;
+                const fill = document.getElementById('storageFill');
+                fill.style.width = `${percentage}%`;
+                
+                if (percentage > 90) {
+                    fill.className = 'storage-fill danger';
+                } else if (percentage > 75) {
+                    fill.className = 'storage-fill warning';
+                } else {
+                    fill.className = 'storage-fill';
+                }
+                
+                document.getElementById('storageUsed').textContent = formatBytes(stats.storage.used);
+                document.getElementById('storageLimit').textContent = formatBytes(stats.storage.limit);
+            }
+        }
+
+        function startStatsRefresh() {
+            statsInterval = setInterval(loadDatabaseStats, 30000); // Refresh every 30 seconds
+        }
+
+        // UI helpers
+        function updateSyncButtons(active) {
+            const buttons = ['syncIdxBtn', 'syncVowBtn', 'syncAllBtn'];
+            const stopBtn = document.getElementById('stopSyncBtn');
+            
+            buttons.forEach(id => {
+                const btn = document.getElementById(id);
+                btn.disabled = active;
+                
+                // Only show loading spinner if this specific button's sync is active
+                const buttonType = id.replace('sync', '').replace('Btn', '').toLowerCase();
+                const isThisButtonActive = active && syncState.type === buttonType;
+                
+                btn.querySelector('.btn-text').style.display = isThisButtonActive ? 'none' : 'inline';
+                btn.querySelector('.loading').classList.toggle('hidden', !isThisButtonActive);
+            });
+            
+            stopBtn.disabled = !active;
+        }
+
+        function showButtonLoading(type, show) {
+            const buttonId = `sync${type.charAt(0).toUpperCase() + type.slice(1)}Btn`;
+            const btn = document.getElementById(buttonId);
+            
+            if (btn) {
+                btn.querySelector('.btn-text').style.display = show ? 'none' : 'inline';
+                btn.querySelector('.loading').classList.toggle('hidden', !show);
+            }
+        }
+
+        function updateActiveSyncsCount() {
+            const count = syncState.active ? 1 : 0;
+            document.getElementById('activeSyncs').textContent = count;
+            
+            // Update status bar color and text based on sync state
+            const statusDot = document.getElementById('systemStatus');
+            const statusText = document.getElementById('syncStatus');
+            
+            if (syncState.active) {
+                statusDot.className = 'status-dot syncing';
+                statusDot.parentElement.querySelector('span').textContent = 'Sync Running';
+                statusText.textContent = `${syncState.type?.toUpperCase()} Running`;
+                statusText.style.color = '#f59e0b';
+            } else {
+                statusDot.className = 'status-dot online';
+                statusDot.parentElement.querySelector('span').textContent = 'System Online';
+                statusText.textContent = 'Idle';
+                statusText.style.color = '#10b981';
+            }
+        }
+
+        function updateLastSyncTimestamp() {
+            if (lastSyncTimestamp) {
+                const timeStr = lastSyncTimestamp.toLocaleTimeString();
+                document.getElementById('lastUpdated').textContent = timeStr;
+            }
+        }
+
+        function addLog(type, message) {
+            const container = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                ${message}
+            `;
+            
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+            
+            // Keep only last 100 log entries
+            while (container.children.length > 100) {
+                container.removeChild(container.firstChild);
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+            addLog('info', 'Logs cleared');
+        }
+
+        // Check feed completion status
+        async function checkFeedCompletion() {
+            const statusElement = document.getElementById('completionStatus');
+            
+            try {
+                statusElement.innerHTML = '<div class="loading"></div><span>Checking feed status...</span>';
+                
+                const response = await fetch('/api/feeds/completion');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                updateCompletionStatus(data);
+                addLog('info', 'Feed completion status updated');
+                
+            } catch (error) {
+                statusElement.innerHTML = `
+                    <div class="alert error">
+                        ❌ Failed to check feed completion: ${error.message}
+                    </div>
+                `;
+                addLog('error', `Feed completion check failed: ${error.message}`);
+            }
+        }
+
+        function updateCompletionStatus(data) {
+            const statusElement = document.getElementById('completionStatus');
+            
+            // Determine overall status
+            let overallStatus = 'complete';
+            let statusIcon = '🎯';
+            let statusText = 'All feeds complete';
+            
+            if (data.feedsWithErrors > 0) {
+                overallStatus = 'error';
+                statusIcon = '❌';
+                statusText = `${data.feedsWithErrors} feed(s) have errors`;
+            } else if (data.feedsWithData > 0) {
+                overallStatus = 'partial';
+                statusIcon = '🔄';
+                statusText = `${data.feedsWithData} feed(s) still have data`;
+            } else if (data.feedsAtLimit > 0) {
+                overallStatus = 'partial';
+                statusIcon = '🛑';
+                statusText = `${data.feedsAtLimit} feed(s) at API limit`;
+            }
+            
+            // Create status HTML
+            let statusHTML = `
+                <div class="alert ${overallStatus === 'complete' ? 'success' : overallStatus === 'error' ? 'error' : 'warning'}">
+                    ${statusIcon} ${statusText}
+                </div>
+                <div style="margin: 1rem 0; font-size: 0.875rem; color: #6b7280;">
+                    📊 Total records: ${data.totalDbRecords.toLocaleString()}<br>
+                    🔄 Feeds with data: ${data.feedsWithData}<br>
+                    🎯 Complete feeds: ${data.feedsComplete}<br>
+                    🛑 API limit feeds: ${data.feedsAtLimit}<br>
+                    ❌ Error feeds: ${data.feedsWithErrors}
+                </div>
+            `;
+            
+            // Add individual feed status
+            if (data.results && data.results.length > 0) {
+                statusHTML += '<div class="feed-status-grid">';
+                data.results.forEach(feed => {
+                    const statusClass = feed.status === 'has_data' ? 'has-data' : 
+                                      feed.status === 'complete' ? 'complete' :
+                                      feed.status === 'api_limit' ? 'api-limit' : 'error';
+                    
+                    const statusIcon = feed.status === 'has_data' ? '🔄' : 
+                                     feed.status === 'complete' ? '🎯' :
+                                     feed.status === 'api_limit' ? '🛑' : '❌';
+                    
+                    statusHTML += `
+                        <div class="feed-status-item ${statusClass}">
+                            <div class="feed-status-title">${statusIcon} ${feed.displayName}</div>
+                            <div class="feed-status-details">
+                                ${feed.dbCount.toLocaleString()} records<br>
+                                ${feed.message || feed.error || 'Unknown status'}
+                            </div>
+                        </div>
+                    `;
+                });
+                statusHTML += '</div>';
+            }
+            
+            statusElement.innerHTML = statusHTML;
+            statusElement.className = `completion-status ${overallStatus}`;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Update last updated time only when there's a sync timestamp
+        setInterval(() => {
+            if (!lastSyncTimestamp) {
+                document.getElementById('lastUpdated').textContent = 'Never';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

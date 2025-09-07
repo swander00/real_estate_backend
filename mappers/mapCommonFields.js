@@ -38,56 +38,48 @@ export function mapCommonFields(idx = {}, vow = {}) {
   // MLS Status with transaction type fallback
   const MlsStatus = normalizeMlsStatus(get('MlsStatus'), get('TransactionType'));
   
-  // Property SubType mapping
-  const PropertySubType = mapPropertySubType(get('PropertySubType'));
+  // Property SubType mapping - return as array for database
+  const propertySubTypeValue = mapPropertySubType(get('PropertySubType'));
+  const PropertySubType = propertySubTypeValue ? [propertySubTypeValue] : null;
   
-  // Architectural Style mapping
-  const ArchitecturalStyle = mapArchitecturalStyle(get('ArchitecturalStyle'));
+  // Architectural Style mapping - return as array for database
+  const architecturalStyleValue = mapArchitecturalStyle(get('ArchitecturalStyle'));
+  const ArchitecturalStyle = architecturalStyleValue ? [architecturalStyleValue] : null;
   
   // Basement and Entrance cleaning
   const basementInfo = parseBasementInfo(get('Basement'));
   const Basement = basementInfo.basement && 
     basementInfo.basement.length > 0 && 
     !basementInfo.basement.every(item => item === "None") 
-      ? basementInfo.basement.filter(item => item !== "None").join(", ")
+      ? basementInfo.basement.filter(item => item !== "None")
       : null;
       
   const BasementEntrance = basementInfo.entrances && 
     basementInfo.entrances.length > 0 && 
     !basementInfo.entrances.every(item => item === "None") 
-      ? basementInfo.entrances.filter(item => item !== "None").join(", ")
+      ? basementInfo.entrances.filter(item => item !== "None")
       : null;
   
-  // Interior Features cleaning
-  const cleanedInteriorFeatures = deepCleanArray(get('InteriorFeatures'));
-  const InteriorFeatures = cleanedInteriorFeatures 
-    ? cleanedInteriorFeatures.join(", ")
-    : null;
+  // Interior Features cleaning - return as array for database
+  const InteriorFeatures = deepCleanArray(get('InteriorFeatures'));
   
-  // Property Features cleaning
-  const cleanedPropertyFeatures = deepCleanArray(get('PropertyFeatures'));
-  const PropertyFeatures = cleanedPropertyFeatures
-    ? cleanedPropertyFeatures.join(", ")
-    : null;
+  // Property Features cleaning - return as array for database
+  const PropertyFeatures = deepCleanArray(get('PropertyFeatures'));
   
-  // Pool Features cleaning
-  const cleanedPoolFeatures = deepCleanArray(get('PoolFeatures'));
-  const PoolFeatures = cleanedPoolFeatures
-    ? cleanedPoolFeatures.join(", ")
-    : null;
+  // Pool Features cleaning - return as array for database
+  const PoolFeatures = deepCleanArray(get('PoolFeatures'));
   
-  // Exterior Features cleaning
-  const cleanedExteriorFeatures = deepCleanArray(get('ExteriorFeatures'));
-  const ExteriorFeatures = cleanedExteriorFeatures
-    ? cleanedExteriorFeatures.join(", ")
-    : null;
+  // Exterior Features cleaning - return as array for database
+  const ExteriorFeatures = deepCleanArray(get('ExteriorFeatures'));
   
-  // Sewer - handle as single value, not array
+  // Rent Includes cleaning - return as array for database
+  const RentIncludes = deepCleanArray(get('RentIncludes'));
+  
+  // Sewer - handle as array for database
   const sewerValue = get('Sewer');
-  // If it's already an array, get the first value; otherwise, clean as is
   const Sewer = Array.isArray(sewerValue) 
-    ? cleanSingleValue(sewerValue[0]) 
-    : cleanSingleValue(sewerValue);
+    ? deepCleanArray(sewerValue)
+    : sewerValue ? [cleanSingleValue(sewerValue)] : null;
   
   // Removed entire LotSize processing block as it's now handled in residentialFreehold mapper
 
@@ -174,12 +166,13 @@ export function mapCommonFields(idx = {}, vow = {}) {
     // =========================================================================
     Cooling:                           cleanValue(get('Cooling')),
     Sewer,                             // Special handling for array to single value
-    Basement,                          // Using parseBasementInfo helper
-    BasementEntrance,                  // Using parseBasementInfo helper
-    ExteriorFeatures,                  // Using deepCleanArray helper with string conversion
-    InteriorFeatures,                  // Using deepCleanArray helper with string conversion
-    PoolFeatures,                      // Using deepCleanArray helper with string conversion
-    PropertyFeatures,                  // Using deepCleanArray helper with string conversion
+    Basement,                          // Using parseBasementInfo helper - returns array
+    BasementEntrance,                  // Using parseBasementInfo helper - returns array
+    ExteriorFeatures,                  // Using deepCleanArray helper - returns array
+    InteriorFeatures,                  // Using deepCleanArray helper - returns array
+    PoolFeatures,                      // Using deepCleanArray helper - returns array
+    PropertyFeatures,                  // Using deepCleanArray helper - returns array
+    // RentIncludes,                      // Using deepCleanArray helper - returns array (add column to DB first)
 
     // =========================================================================
     // SINGLE VALUE PROPERTY CHARACTERISTICS

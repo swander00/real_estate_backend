@@ -78,34 +78,60 @@ export function formatOpenHouseTime(rawStartTime, rawEndTime) {
   let endTime = null;
   let formattedRange = null;
   
-  if (rawStartTime) {
-    const startDate = new Date(rawStartTime);
-    if (!isNaN(startDate.getTime())) {
-      startTime = startDate.toTimeString().split(' ')[0]; // HH:MM:SS format
+  // Helper function to parse time string (HH:MM:SS or HH:MM format)
+  function parseTimeString(timeStr) {
+    if (!timeStr) return null;
+    
+    // If it's already in HH:MM:SS format, return as-is
+    if (/^\d{1,2}:\d{2}:\d{2}$/.test(timeStr)) {
+      return timeStr;
     }
+    
+    // If it's in HH:MM format, add seconds
+    if (/^\d{1,2}:\d{2}$/.test(timeStr)) {
+      return timeStr + ':00';
+    }
+    
+    // Try to parse as a full timestamp
+    const date = new Date(timeStr);
+    if (!isNaN(date.getTime())) {
+      return date.toTimeString().split(' ')[0]; // HH:MM:SS format
+    }
+    
+    return null;
+  }
+  
+  // Helper function to format time for display
+  function formatTimeForDisplay(timeStr) {
+    if (!timeStr) return null;
+    
+    // Parse the time string
+    const time = parseTimeString(timeStr);
+    if (!time) return null;
+    
+    // Convert to 12-hour format for display
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    
+    return `${displayHour}:${minutes} ${ampm}`;
+  }
+  
+  if (rawStartTime) {
+    startTime = parseTimeString(rawStartTime);
   }
   
   if (rawEndTime) {
-    const endDate = new Date(rawEndTime);
-    if (!isNaN(endDate.getTime())) {
-      endTime = endDate.toTimeString().split(' ')[0]; // HH:MM:SS format
-    }
+    endTime = parseTimeString(rawEndTime);
   }
   
   if (rawStartTime && rawEndTime) {
-    const startDate = new Date(rawStartTime);
-    const endDate = new Date(rawEndTime);
+    const startDisplay = formatTimeForDisplay(rawStartTime);
+    const endDisplay = formatTimeForDisplay(rawEndTime);
     
-    if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
-      formattedRange = `${startDate.toLocaleTimeString('en-US', { 
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true 
-      })} - ${endDate.toLocaleTimeString('en-US', { 
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      })}`;
+    if (startDisplay && endDisplay) {
+      formattedRange = `${startDisplay} - ${endDisplay}`;
     }
   }
   

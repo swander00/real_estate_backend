@@ -11,6 +11,11 @@ export function mapPropertyRooms(idx = {}) {
   const now = new Date().toISOString();
   const existingCreatedAt = idx.CreatedAt ?? null;
   
+  // Debug logging for problematic records
+  if (process.env.DEBUG_MAPPING === 'true') {
+    console.log('🔍 mapPropertyRooms input:', JSON.stringify(idx, null, 2));
+  }
+  
   // Use combineRoomFeatures helper to handle room features
   const roomFeatures = combineRoomFeatures(
     idx.RoomFeature1, 
@@ -37,7 +42,7 @@ export function mapPropertyRooms(idx = {}) {
   // Format combined features as string if they exist
   const formattedFeatures = combinedFeatures ? combinedFeatures.join(", ") : null;
   
-  return {
+  const result = {
     RoomKey: idx.RoomKey ?? null,
     ListingKey: idx.ListingKey ?? null,
     Order: idx.Order ?? null,
@@ -54,6 +59,13 @@ export function mapPropertyRooms(idx = {}) {
     CreatedAt: existingCreatedAt || now,
     UpdatedAt: now
   };
+  
+  // Debug logging for output
+  if (process.env.DEBUG_MAPPING === 'true') {
+    console.log('✅ mapPropertyRooms output:', JSON.stringify(result, null, 2));
+  }
+  
+  return result;
 }
 
 /**

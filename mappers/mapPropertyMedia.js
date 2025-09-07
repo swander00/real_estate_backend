@@ -1,38 +1,46 @@
 // mappers/mapPropertyMedia.js - RESO-compliant Media mapper
 export function mapPropertyMedia(item) {
+  // Skip records without required keys
+  if (!item.MediaKey) {
+    return null;
+  }
+  
+  // Use ResourceRecordKey as ListingKey if ListingKey is not available
+  const listingKey = item.ListingKey || item.ResourceRecordKey;
+  if (!listingKey) {
+    return null;
+  }
+  
   return {
     // === PRIMARY KEYS & IDENTIFIERS ===
-    MediaKey: item.MediaKey || null,                              // Primary key - unique media identifier
-    ResourceRecordKey: item.ResourceRecordKey || null,            // Foreign key to parent resource (e.g., ListingKey)
-    ResourceName: item.ResourceName || 'Property',                // Resource type (Property, Office, Member)
-    
+    MediaKey: item.MediaKey,
+    ListingKey: listingKey,                   // Link to Property table (use ResourceRecordKey as fallback)
+    ResourceRecordKey: item.ResourceRecordKey,
+    ResourceName: item.ResourceName,
+
     // === CORE MEDIA FIELDS ===
-    MediaURL: item.MediaURL || null,                              // Media file URL
-    MediaType: item.MediaType || null,                            // Photo, Video, VirtualTour, Document, etc.
-    MediaCategory: item.MediaCategory || null,                    // Interior, Exterior, etc.
-    MediaStatus: item.MediaStatus || 'Active',                    // Active, Inactive, etc.
-    
+    MediaURL: item.MediaURL,
+    MediaType: item.MediaType,
+    MediaCategory: item.MediaCategory,
+    MediaStatus: item.MediaStatus,
+
     // === DISPLAY & ORDERING ===
-    Order: item.Order ? parseInt(item.Order) : null,              // Display order (no preferred photo constraint)
-    
+    Order: item.Order,
+
     // === DESCRIPTIONS ===
-    ShortDescription: item.ShortDescription || null,              // Brief media description
-    
+    ShortDescription: item.ShortDescription,
+
     // === CLASSIFICATION ===
-    ClassName: item.ClassName || null,                            // RESO class name (PascalCase)
-    ImageOf: item.ImageOf || null,                                // What the image shows
-    ImageSizeDescription: item.ImageSizeDescription || null,      // Small, Medium, Large, etc.
-    
+    ClassName: item.ClassName,
+    ImageOf: item.ImageOf,
+    ImageSizeDescription: item.ImageSizeDescription,
+
     // === SYSTEM IDENTIFIERS ===
-    MediaObjectID: item.MediaObjectID || null,                    // External media object ID
-    OriginatingSystemID: item.OriginatingSystemID || null,        // Source system identifier
-    
+    MediaObjectID: item.MediaObjectID,
+    OriginatingSystemID: item.OriginatingSystemID,
+
     // === TIMESTAMPS ===
-    ModificationTimestamp: item.ModificationTimestamp || null,    // Generic modification timestamp
-    MediaModificationTimestamp: item.MediaModificationTimestamp || null, // Media-specific modification timestamp
-    
-    // === METADATA ===
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    ModificationTimestamp: item.ModificationTimestamp,
+    MediaModificationTimestamp: item.MediaModificationTimestamp
   };
 }
