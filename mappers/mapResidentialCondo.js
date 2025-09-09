@@ -1,8 +1,8 @@
 // mappers/mapResidentialCondo.js
 
 // Import only necessary helpers from the new utility files
-import { cleanSingleValue, cleanValue } from '../utils/valueCleaners.js';
-import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
+import { cleanSingleValue, cleanValue } from '../utils/dataCleaners.js';
+import { cleanTimestamp } from '../utils/formatters.js';
 
 export function mapResidentialCondo(idx = {}, vow = {}) {
   const get = (field) => (vow[field] ?? idx[field] ?? null);

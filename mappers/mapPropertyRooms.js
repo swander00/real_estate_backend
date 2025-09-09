@@ -1,90 +1,50 @@
-// mappers/mapPropertyRooms.js
+// mappers/mapPropertyRooms_clean.js - Clean PropertyRooms mapper with PascalCase
 
-// Import only necessary helpers from the new utility files
-import { cleanSingleValue, deepCleanArray } from "../utils/valueCleaners.js";
-import { formatRoomMeasurements } from "../utils/measurementFormatters.js";
-import { cleanTimestamp } from "../utils/dateTimeHelpers.js";
-import { combineRoomFeatures } from "../utils/textFormatters.js";
+import { cleanSingleValue } from "../utils/dataCleaners.js";
+import { cleanTimestamp, combineRoomFeatures, buildLotSize } from "../utils/formatters.js";
 
-export function mapPropertyRooms(idx = {}) {
-  // Get current timestamp for database operations
+export function mapPropertyRooms(item) {
+  // Skip records without required keys
+  if (!item.RoomKey) {
+    return null;
+  }
+  
+  if (!item.ListingKey) {
+    return null;
+  }
+
+  // Get current timestamp
   const now = new Date().toISOString();
-  const existingCreatedAt = idx.CreatedAt ?? null;
-  
-  // Debug logging for problematic records
-  if (process.env.DEBUG_MAPPING === 'true') {
-    console.log('🔍 mapPropertyRooms input:', JSON.stringify(idx, null, 2));
-  }
-  
-  // Use combineRoomFeatures helper to handle room features
-  const roomFeatures = combineRoomFeatures(
-    idx.RoomFeature1, 
-    idx.RoomFeature2, 
-    idx.RoomFeature3
-  );
-  
-  // Additional features from the RoomFeatures field
-  let combinedFeatures = roomFeatures;
-  if (idx.RoomFeatures) {
-    // Clean RoomFeatures using deepCleanArray
-    const additionalFeatures = deepCleanArray(idx.RoomFeatures);
-    
-    // Combine with the already processed features
-    if (additionalFeatures) {
-      if (combinedFeatures) {
-        combinedFeatures = [...combinedFeatures, ...additionalFeatures];
-      } else {
-        combinedFeatures = additionalFeatures;
-      }
-    }
-  }
-  
-  // Format combined features as string if they exist
-  const formattedFeatures = combinedFeatures ? combinedFeatures.join(", ") : null;
-  
-  const result = {
-    RoomKey: idx.RoomKey ?? null,
-    ListingKey: idx.ListingKey ?? null,
-    Order: idx.Order ?? null,
-    RoomType: cleanSingleValue(idx.RoomType) ?? null,
-    RoomLevel: cleanSingleValue(idx.RoomLevel) ?? null,
-    RoomMeasurements: formatRoomMeasurements(
-      idx.RoomDimensions,
-      idx.RoomLengthWidthUnits
-    ),
-    RoomFeatures: formattedFeatures,
-    ModificationTimestamp: cleanTimestamp(idx.ModificationTimestamp),
-    SystemModificationTimestamp: cleanTimestamp(idx.SystemModificationTimestamp),
-    OriginalEntryTimestamp: cleanTimestamp(idx.OriginalEntryTimestamp),
-    CreatedAt: existingCreatedAt || now,
-    UpdatedAt: now
+
+  return {
+    // === PRIMARY IDENTIFIERS ===
+    ListingID: cleanSingleValue(item.ListingID) || null,
+    ListingKey: item.ListingKey,
+    RoomKey: item.RoomKey,
+
+    // === TIMESTAMPS ===
+    ModificationTimestamp: cleanTimestamp(item.ModificationTimestamp),
+    CreatedAt: now,
+    UpdatedAt: now,
+
+    // === ROOM ORDERING ===
+    Order: item.Order || null,
+
+    // === ROOM AREA & DIMENSIONS ===
+    RoomDescription: cleanSingleValue(item.RoomDescription) || null,
+    RoomLength: cleanSingleValue(item.RoomLength) || null,
+    RoomLengthWidthUnits: cleanSingleValue(item.RoomLengthWidthUnits) || null,
+    RoomWidth: cleanSingleValue(item.RoomWidth) || null,
+    RoomDimensions: buildLotSize(item.RoomLength, item.RoomWidth, item.RoomLengthWidthUnits),
+
+    // === ROOM FEATURES ===
+    RoomFeature1: cleanSingleValue(item.RoomFeature1) || null,
+    RoomFeature2: cleanSingleValue(item.RoomFeature2) || null,
+    RoomFeature3: cleanSingleValue(item.RoomFeature3) || null,
+    RoomFeatures: combineRoomFeatures(item.RoomFeature1, item.RoomFeature2, item.RoomFeature3),
+
+    // === ROOM CLASSIFICATION ===
+    RoomLevel: cleanSingleValue(item.RoomLevel) || null,
+    RoomType: cleanSingleValue(item.RoomType) || null
   };
-  
-  // Debug logging for output
-  if (process.env.DEBUG_MAPPING === 'true') {
-    console.log('✅ mapPropertyRooms output:', JSON.stringify(result, null, 2));
-  }
-  
-  return result;
-}
-
-/**
- * Upserts room records into the property_rooms table.
- *
- * @param {object} supabase - Supabase client
- * @param {Array<object>} records - Raw feed records
- */
-export async function upsertRooms(supabase, records) {
-  const mapped = records.map((record) => mapPropertyRooms(record));
-
-  const { data, error } = await supabase
-    .from("property_rooms")
-    .upsert(mapped, { onConflict: "RoomKey" });
-
-  if (error) {
-    console.error("Error upserting room records:", error);
-    throw error;
-  } else {
-    console.log(`Upserted ${mapped.length} room records`);
-  }
 }

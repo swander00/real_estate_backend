@@ -1,9 +1,8 @@
 // mappers/mapResidentialFreehold.js
 
 // Import helpers from new utility files
-import { cleanSingleValue } from '../utils/valueCleaners.js';
-import { cleanTimestamp } from '../utils/dateTimeHelpers.js';
-import { buildLotSize } from '../utils/measurementFormatters.js';
+import { cleanSingleValue } from '../utils/dataCleaners.js';
+import { cleanTimestamp, buildLotSize } from '../utils/formatters.js';
 
 export function mapResidentialFreehold(idx = {}, vow = {}) {
   const get = (field) => vow[field] ?? idx[field] ?? null;

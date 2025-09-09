@@ -41,7 +41,7 @@ async function monitorOrphanedRecords() {
     const tables = [
       { name: 'property_openhouse', key: 'OpenHouseKey', parentKey: 'ListingKey' },
       { name: 'property_rooms', key: 'RoomKey', parentKey: 'ListingKey' },
-      { name: 'property_media', key: 'MediaKey', parentKey: 'ListingKey' }
+      { name: 'property_media', key: 'MediaKey', parentKey: 'ResourceRecordKey' }
     ];
 
     console.log('🔍 Current Orphaned Records Check:');

@@ -69,7 +69,7 @@ BEGIN
       CASE 
         WHEN target_table = 'property_openhouse' THEN 'ListingKey'
         WHEN target_table = 'property_rooms' THEN 'ListingKey'
-        WHEN target_table = 'property_media' THEN 'ListingKey'
+        WHEN target_table = 'property_media' THEN 'ResourceRecordKey'
         ELSE 'ListingKey'
       END,
       batch_size,
@@ -132,7 +132,7 @@ $$ LANGUAGE plpgsql;
 CREATE INDEX IF NOT EXISTS idx_common_fields_listing_key ON common_fields(ListingKey);
 CREATE INDEX IF NOT EXISTS idx_property_openhouse_listing_key ON property_openhouse(ListingKey);
 CREATE INDEX IF NOT EXISTS idx_property_rooms_listing_key ON property_rooms(ListingKey);
-CREATE INDEX IF NOT EXISTS idx_property_media_listing_key ON property_media(ListingKey);
+CREATE INDEX IF NOT EXISTS idx_property_media_resource_record_key ON property_media(ResourceRecordKey);
 
 -- Create view for monitoring orphaned records
 CREATE OR REPLACE VIEW orphaned_records_summary AS

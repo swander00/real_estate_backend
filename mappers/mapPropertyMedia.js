@@ -5,17 +5,16 @@ export function mapPropertyMedia(item) {
     return null;
   }
   
-  // Use ResourceRecordKey as ListingKey if ListingKey is not available
-  const listingKey = item.ListingKey || item.ResourceRecordKey;
-  if (!listingKey) {
+  // Use ResourceRecordKey as the primary connection to common_fields table
+  if (!item.ResourceRecordKey) {
     return null;
   }
   
   return {
     // === PRIMARY KEYS & IDENTIFIERS ===
     MediaKey: item.MediaKey,
-    ListingKey: listingKey,                   // Link to Property table (use ResourceRecordKey as fallback)
-    ResourceRecordKey: item.ResourceRecordKey,
+    ListingKey: item.ListingKey || item.ResourceRecordKey, // Use ResourceRecordKey as fallback to satisfy NOT NULL constraint
+    ResourceRecordKey: item.ResourceRecordKey, // Primary connection to common_fields.ListingKey
     ResourceName: item.ResourceName,
 
     // === CORE MEDIA FIELDS ===
