@@ -1,0 +1,182 @@
+-- ==========================================================
+-- 1️⃣ CORE VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertycore CASCADE;
+CREATE VIEW propertycore AS
+SELECT 
+  "ListingKey",
+  "ListPrice",
+  "ClosePrice",
+  "MlsStatus",
+  "ContractStatus",
+  "StandardStatus",
+  "TransactionType",
+  "PropertyType",
+  "PropertySubType",
+  "ModificationTimestamp",
+  "OriginalEntryTimestamp",
+  "CreatedAt",
+  "UpdatedAt"
+FROM property;
+
+-- ==========================================================
+-- 2️⃣ ADDRESS VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertyaddress CASCADE;
+CREATE VIEW propertyaddress AS
+SELECT
+  "ListingKey",
+  INITCAP("UnparsedAddress") AS "UnparsedAddress",
+  "StreetNumber",
+  INITCAP("StreetName") AS "StreetName",
+  "StreetSuffix",
+  CASE 
+    WHEN "City" LIKE 'Toronto%' THEN 'Toronto'
+    ELSE INITCAP("City")
+  END AS "City",
+  INITCAP("CountyOrParish") AS "CountyOrParish",
+  INITCAP("CityRegion") AS "CityRegion",
+  "StateOrProvince",
+  "PostalCode",
+  CASE 
+    WHEN "UnitNumber" IS NOT NULL AND "UnitNumber" <> '' THEN '#' || "UnitNumber" || '-'
+    ELSE "UnitNumber"
+  END AS "UnitNumber"
+FROM property;
+
+-- ==========================================================
+-- 3️⃣ LAYOUT VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertylayout CASCADE;
+CREATE VIEW propertylayout AS
+SELECT
+  "ListingKey",
+  "BedroomsAboveGrade",
+  "BedroomsBelowGrade",
+  "BathroomsTotalInteger",
+  "KitchensAboveGrade",
+  "KitchensBelowGrade",
+  "KitchensTotal",
+  "DenFamilyRoomYN",
+  "LivingAreaRange"
+FROM property;
+
+-- ==========================================================
+-- 4️⃣ FEATURES VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertyfeatures CASCADE;
+CREATE VIEW propertyfeatures AS
+SELECT
+  "ListingKey",
+  array_to_string("ArchitecturalStyle", ', ') AS "ArchitecturalStyle",
+  array_to_string("Cooling", ', ') AS "Cooling",
+  array_to_string("Sewer", ', ') AS "Sewer",
+  (
+    SELECT array_to_string(
+      ARRAY(
+        SELECT DISTINCT INITCAP(word)
+        FROM unnest(
+          string_to_array(
+            REGEXP_REPLACE(
+              REGEXP_REPLACE(
+                LOWER(array_to_string(COALESCE("Basement", ARRAY[]::text[]), ' ')),
+                '\bfull\b|\bwith\b', '', 'g'
+              ),
+              '[,\-]', ' ', 'g'
+            ),
+            ' '
+          )
+        ) AS word
+        WHERE word IS NOT NULL AND word <> ''
+        ORDER BY INITCAP(word)
+      ),
+      ', '
+    )
+  ) AS "Basement",
+  "BasementEntrance",
+  array_to_string("ExteriorFeatures", ', ') AS "ExteriorFeatures",
+  array_to_string("InteriorFeatures", ', ') AS "InteriorFeatures",
+  array_to_string("PropertyFeatures", ', ') AS "PropertyFeatures",
+  array_to_string("PoolFeatures", ', ') AS "PoolFeatures",
+  array_to_string("RentIncludes", ', ') AS "RentIncludes",
+  "HeatType",
+  "FireplaceYN",
+  "WaterfrontYN"
+FROM property;
+
+-- ==========================================================
+-- 5️⃣ LOT + PARKING VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertylotparking CASCADE;
+CREATE VIEW propertylotparking AS
+SELECT
+  "ListingKey",
+  "LotSize",
+  "ApproximateAge",
+  "CoveredSpaces",
+  "ParkingSpaces",
+  "ParkingTotal"
+FROM property;
+
+-- ==========================================================
+-- 6️⃣ FINANCIAL VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertyfinancial CASCADE;
+CREATE VIEW propertyfinancial AS
+SELECT
+  "ListingKey",
+  "ListPrice",
+  "ClosePrice",
+  "TaxAnnualAmount",
+  "TaxYear",
+  "AssociationFee",
+  array_to_string("AssociationFeeIncludes", ', ') AS "AssociationFeeIncludes",
+  "AdditionalMonthlyFee"
+FROM property;
+
+-- ==========================================================
+-- 7️⃣ TIMESTAMPS VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertytimestamps CASCADE;
+CREATE VIEW propertytimestamps AS
+SELECT
+  "ListingKey",
+  "OriginalEntryTimestamp",
+  "SoldConditionalEntryTimestamp",
+  "SoldEntryTimestamp",
+  "SuspendedEntryTimestamp",
+  "SuspendedDate",
+  "TerminatedEntryTimestamp",
+  "TerminatedDate",
+  "UnavailableDate"
+FROM property;
+
+-- ==========================================================
+-- 8️⃣ OPEN HOUSE VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS propertyopenhouse CASCADE;
+CREATE VIEW propertyopenhouse AS
+SELECT
+  "ListingKey",
+  "OpenHouseDate",
+  "OpenHouseStartTime",
+  "OpenHouseEndTime",
+  "OpenHouseStatus",
+  "OpenHouseDateTime"
+FROM property;
+
+-- ==========================================================
+-- 9️⃣ MEDIA VIEW
+-- ==========================================================
+DROP VIEW IF EXISTS mediamain CASCADE;
+CREATE VIEW mediamain AS
+SELECT
+  "ResourceRecordKey" AS "ListingKey",
+  "MediaKey",
+  "MediaURL",
+  "MediaCategory",
+  "MediaType",
+  "PreferredPhotoYN",
+  "Order",
+  "MediaModificationTimestamp"
+FROM media;
