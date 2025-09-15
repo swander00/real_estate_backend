@@ -1,0 +1,16 @@
+2025-09-15 17:26:08 [INFO]: === TRREB RESO Web API Sync Started ===
+2025-09-15 17:26:08 [INFO]: Mode: Media Only
+2025-09-15 17:26:08 [INFO]: Incremental: false
+2025-09-15 17:26:08 [INFO]: Environment: development
+2025-09-15 17:26:08 [INFO]: Timestamp: 2025-09-15T21:26:08.470Z
+2025-09-15 17:26:09 [INFO]: ✅ Database connection established – sample row fetched
+2025-09-15 17:26:09 [INFO]: === Starting Media Sync ===
+2025-09-15 17:26:09 [INFO]: [MEDIA] Calling fetchMediaRecords...
+2025-09-15 17:26:09 [INFO]: [fetchMediaRecords] Starting - Version: FIXED WITH DEBUG
+2025-09-15 17:26:09 [INFO]: [fetchMediaRecords] Fetching media records (incremental: false)
+2025-09-15 17:26:09 [INFO]: [fetchMediaRecords] BaseURL: undefined
+2025-09-15 17:26:09 [INFO]: [fetchMediaRecords] Token exists: true
+2025-09-15 17:26:09 [ERROR]: [MEDIA] ❌ Media sync failed:
+2025-09-15 17:26:09 [ERROR]: [MEDIA] Stack trace:
+2025-09-15 17:26:09 [INFO]: === SYNC COMPLETE ===
+2025-09-15 17:26:09 [INFO]: Completed at: 2025-09-15T21:26:09.101Z

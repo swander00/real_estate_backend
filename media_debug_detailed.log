@@ -1,0 +1,506 @@
+2025-09-15 17:02:36 [INFO]: === TRREB RESO Web API Sync Started ===
+2025-09-15 17:02:36 [INFO]: Mode: Media Only
+2025-09-15 17:02:36 [INFO]: Incremental: false
+2025-09-15 17:02:36 [INFO]: ✅ Database connection established – sample row fetched
+2025-09-15 17:02:36 [INFO]: === Starting Media Sync ===
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] Starting - Version: FIXED WITH DEBUG
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] Fetching media records (incremental: false)
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] BaseURL: https://query.ampre.ca/odata/Media
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] Token exists: true
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] Starting media sync - about to call fetchMediaWithSmartPagination
+2025-09-15 17:02:36 [INFO]: [fetchMediaRecords] Filter: NO FILTER (full sync)
+2025-09-15 17:02:36 [INFO]: [fetchMediaWithSmartPagination] *** FUNCTION CALLED ***
+2025-09-15 17:02:36 [INFO]: [fetchMediaWithSmartPagination] Incremental: false
+2025-09-15 17:02:36 [INFO]: [fetchMediaWithSmartPagination] BaseFilter: none
+2025-09-15 17:02:36 [INFO]: [fetchMediaWithSmartPagination] Full sync detected - calling fetchMediaInDateChunks
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] *** STARTING DATE-BASED CHUNKING ***
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] Starting from: 2025-09-16T21:02:36.463Z
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] Days per chunk: 7
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] === CHUNK 1 ===
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] Date range: 2025-09-09 to 2025-09-16
+2025-09-15 17:02:36 [INFO]: [fetchMediaInDateChunks] Filter: MediaModificationTimestamp ge 2025-09-09T21:02:36.463Z and MediaModificationTimestamp lt 2025-09-16T21:02:36.463Z
+2025-09-15 17:02:38 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:02:38 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:02:41 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:02:41 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 1: Upserted 5000 unique media records
+2025-09-15 17:02:42 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:02:42 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:02:45 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:02:45 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 2: Upserted 5000 unique media records
+2025-09-15 17:02:46 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:02:46 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:02:49 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:02:49 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:02:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:02:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 667 duplicate records in batch 4
+2025-09-15 17:02:50 [INFO]: [upsertBatch] Upserting 4333 records into "media" table...
+2025-09-15 17:02:52 [INFO]: [upsertBatch] ✅ Successfully upserted 4333 records to media.
+2025-09-15 17:02:52 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 4: Upserted 4333 unique media records
+2025-09-15 17:02:53 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:02:53 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:02:55 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:02:55 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 5: Upserted 5000 unique media records
+2025-09-15 17:02:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 6: Fetched 5000 media records (skip=25000)
+2025-09-15 17:02:57 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:00 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:00 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 6: Upserted 5000 unique media records
+2025-09-15 17:03:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 7: Fetched 5000 media records (skip=30000)
+2025-09-15 17:03:01 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:04 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 7: Upserted 5000 unique media records
+2025-09-15 17:03:05 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 8: Fetched 5000 media records (skip=35000)
+2025-09-15 17:03:05 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:08 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:08 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 8: Upserted 5000 unique media records
+2025-09-15 17:03:08 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 9: Fetched 5000 media records (skip=40000)
+2025-09-15 17:03:08 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 281 duplicate records in batch 9
+2025-09-15 17:03:08 [INFO]: [upsertBatch] Upserting 4719 records into "media" table...
+2025-09-15 17:03:11 [INFO]: [upsertBatch] ✅ Successfully upserted 4719 records to media.
+2025-09-15 17:03:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 9: Upserted 4719 unique media records
+2025-09-15 17:03:12 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 10: Fetched 5000 media records (skip=45000)
+2025-09-15 17:03:12 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 426 duplicate records in batch 10
+2025-09-15 17:03:12 [INFO]: [upsertBatch] Upserting 4574 records into "media" table...
+2025-09-15 17:03:14 [INFO]: [upsertBatch] ✅ Successfully upserted 4574 records to media.
+2025-09-15 17:03:14 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 10: Upserted 4574 unique media records
+2025-09-15 17:03:15 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 11: Fetched 5000 media records (skip=50000)
+2025-09-15 17:03:15 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 1506 duplicate records in batch 11
+2025-09-15 17:03:15 [INFO]: [upsertBatch] Upserting 3494 records into "media" table...
+2025-09-15 17:03:17 [INFO]: [upsertBatch] ✅ Successfully upserted 3494 records to media.
+2025-09-15 17:03:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 11: Upserted 3494 unique media records
+2025-09-15 17:03:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 12: Fetched 5000 media records (skip=55000)
+2025-09-15 17:03:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 942 duplicate records in batch 12
+2025-09-15 17:03:17 [INFO]: [upsertBatch] Upserting 4058 records into "media" table...
+2025-09-15 17:03:19 [INFO]: [upsertBatch] ✅ Successfully upserted 4058 records to media.
+2025-09-15 17:03:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 12: Upserted 4058 unique media records
+2025-09-15 17:03:20 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 13: Fetched 5000 media records (skip=60000)
+2025-09-15 17:03:20 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:23 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:23 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 13: Upserted 5000 unique media records
+2025-09-15 17:03:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 14: Fetched 5000 media records (skip=65000)
+2025-09-15 17:03:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 3310 duplicate records in batch 14
+2025-09-15 17:03:24 [INFO]: [upsertBatch] Upserting 1690 records into "media" table...
+2025-09-15 17:03:24 [INFO]: [upsertBatch] ✅ Successfully upserted 1690 records to media.
+2025-09-15 17:03:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 14: Upserted 1690 unique media records
+2025-09-15 17:03:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 15: Fetched 5000 media records (skip=70000)
+2025-09-15 17:03:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 1924 duplicate records in batch 15
+2025-09-15 17:03:25 [INFO]: [upsertBatch] Upserting 3076 records into "media" table...
+2025-09-15 17:03:26 [INFO]: [upsertBatch] ✅ Successfully upserted 3076 records to media.
+2025-09-15 17:03:26 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 15: Upserted 3076 unique media records
+2025-09-15 17:03:27 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 16: Fetched 5000 media records (skip=75000)
+2025-09-15 17:03:27 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:30 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:30 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 16: Upserted 5000 unique media records
+2025-09-15 17:03:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 17: Fetched 5000 media records (skip=80000)
+2025-09-15 17:03:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 868 duplicate records in batch 17
+2025-09-15 17:03:31 [INFO]: [upsertBatch] Upserting 4132 records into "media" table...
+2025-09-15 17:03:33 [INFO]: [upsertBatch] ✅ Successfully upserted 4132 records to media.
+2025-09-15 17:03:33 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 17: Upserted 4132 unique media records
+2025-09-15 17:03:34 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 18: Fetched 5000 media records (skip=85000)
+2025-09-15 17:03:34 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 2433 duplicate records in batch 18
+2025-09-15 17:03:34 [INFO]: [upsertBatch] Upserting 2567 records into "media" table...
+2025-09-15 17:03:35 [INFO]: [upsertBatch] ✅ Successfully upserted 2567 records to media.
+2025-09-15 17:03:35 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 18: Upserted 2567 unique media records
+2025-09-15 17:03:36 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 19: Fetched 5000 media records (skip=90000)
+2025-09-15 17:03:36 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 111 duplicate records in batch 19
+2025-09-15 17:03:36 [INFO]: [upsertBatch] Upserting 4889 records into "media" table...
+2025-09-15 17:03:39 [INFO]: [upsertBatch] ✅ Successfully upserted 4889 records to media.
+2025-09-15 17:03:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 19: Upserted 4889 unique media records
+2025-09-15 17:03:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 20: Fetched 5000 media records (skip=95000)
+2025-09-15 17:03:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Removed 2674 duplicate records in batch 20
+2025-09-15 17:03:39 [INFO]: [upsertBatch] Upserting 2326 records into "media" table...
+2025-09-15 17:03:40 [INFO]: [upsertBatch] ✅ Successfully upserted 2326 records to media.
+2025-09-15 17:03:40 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Batch 20: Upserted 2326 unique media records
+2025-09-15 17:03:40 [WARN]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Reached API limit of 100,000 records
+2025-09-15 17:03:40 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-chunk1] Subtotal: Fetched 100000, Unique 84858, Duplicates 15142, Upserted 84858
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks] Chunk 1 completed:
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks]   - Fetched: 100000
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks]   - Unique: 84858
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks]   - Upserted: 84858
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks]   - Hit limit: true
+2025-09-15 17:03:40 [INFO]: [fetchMediaInDateChunks] Found records, resetting empty counter
+2025-09-15 17:03:40 [WARN]: [fetchMediaInDateChunks] Chunk 1 hit API limit!
+2025-09-15 17:03:40 [WARN]: [fetchMediaInDateChunks] Breaking down to daily chunks...
+2025-09-15 17:03:40 [INFO]: [fetchMediaDailyInRange] Breaking down week into daily chunks
+2025-09-15 17:03:40 [INFO]: [fetchMediaDailyInRange] Range: 2025-09-09T21:02:36.463Z to 2025-09-16T21:02:36.463Z
+2025-09-15 17:03:40 [INFO]: [fetchMediaDailyInRange] Day 1: 2025-09-09
+2025-09-15 17:03:41 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:03:41 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Removed 50 duplicate records in batch 1
+2025-09-15 17:03:41 [INFO]: [upsertBatch] Upserting 4950 records into "media" table...
+2025-09-15 17:03:44 [INFO]: [upsertBatch] ✅ Successfully upserted 4950 records to media.
+2025-09-15 17:03:44 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 1: Upserted 4950 unique media records
+2025-09-15 17:03:44 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:03:44 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:47 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:47 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 2: Upserted 5000 unique media records
+2025-09-15 17:03:48 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:03:48 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:50 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:03:51 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:03:51 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:03:54 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:03:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 4: Upserted 5000 unique media records
+2025-09-15 17:03:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:03:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Removed 565 duplicate records in batch 5
+2025-09-15 17:03:54 [INFO]: [upsertBatch] Upserting 4435 records into "media" table...
+2025-09-15 17:03:57 [INFO]: [upsertBatch] ✅ Successfully upserted 4435 records to media.
+2025-09-15 17:03:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 5: Upserted 4435 unique media records
+2025-09-15 17:03:58 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 6: Fetched 5000 media records (skip=25000)
+2025-09-15 17:03:58 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:01 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 6: Upserted 5000 unique media records
+2025-09-15 17:04:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 7: Fetched 5000 media records (skip=30000)
+2025-09-15 17:04:01 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:04 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 7: Upserted 5000 unique media records
+2025-09-15 17:04:05 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 8: Fetched 5000 media records (skip=35000)
+2025-09-15 17:04:05 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:07 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:07 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 8: Upserted 5000 unique media records
+2025-09-15 17:04:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 9: Fetched 5000 media records (skip=40000)
+2025-09-15 17:04:09 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:12 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:12 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 9: Upserted 5000 unique media records
+2025-09-15 17:04:12 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 10: Fetched 5000 media records (skip=45000)
+2025-09-15 17:04:12 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:15 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:15 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 10: Upserted 5000 unique media records
+2025-09-15 17:04:16 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 11: Fetched 5000 media records (skip=50000)
+2025-09-15 17:04:16 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:19 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 11: Upserted 5000 unique media records
+2025-09-15 17:04:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 12: Fetched 5000 media records (skip=55000)
+2025-09-15 17:04:20 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:22 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 12: Upserted 5000 unique media records
+2025-09-15 17:04:23 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 13: Fetched 5000 media records (skip=60000)
+2025-09-15 17:04:23 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:26 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:26 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 13: Upserted 5000 unique media records
+2025-09-15 17:04:27 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 14: Fetched 5000 media records (skip=65000)
+2025-09-15 17:04:27 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:30 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:30 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 14: Upserted 5000 unique media records
+2025-09-15 17:04:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 15: Fetched 5000 media records (skip=70000)
+2025-09-15 17:04:31 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:34 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:34 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 15: Upserted 5000 unique media records
+2025-09-15 17:04:35 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 16: Fetched 5000 media records (skip=75000)
+2025-09-15 17:04:35 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:38 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:38 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 16: Upserted 5000 unique media records
+2025-09-15 17:04:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 17: Fetched 5000 media records (skip=80000)
+2025-09-15 17:04:39 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:42 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:42 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 17: Upserted 5000 unique media records
+2025-09-15 17:04:43 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 18: Fetched 5000 media records (skip=85000)
+2025-09-15 17:04:43 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:45 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:45 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 18: Upserted 5000 unique media records
+2025-09-15 17:04:46 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 19: Fetched 5000 media records (skip=90000)
+2025-09-15 17:04:46 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:49 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:49 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 19: Upserted 5000 unique media records
+2025-09-15 17:04:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 20: Fetched 5000 media records (skip=95000)
+2025-09-15 17:04:50 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:04:53 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:04:53 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Batch 20: Upserted 5000 unique media records
+2025-09-15 17:04:53 [WARN]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Reached API limit of 100,000 records
+2025-09-15 17:04:53 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-09] Subtotal: Fetched 100000, Unique 184243, Duplicates -84243, Upserted 99385
+2025-09-15 17:04:53 [INFO]: [fetchMediaDailyInRange] Day 1 result: fetched=100000, hitLimit=true
+2025-09-15 17:04:53 [ERROR]: [fetchMediaDailyInRange] Single day 2025-09-09 has more than 100K records!
+2025-09-15 17:04:53 [ERROR]: [fetchMediaDailyInRange] This would require hourly chunking. Skipping some records.
+2025-09-15 17:04:53 [INFO]: [fetchMediaDailyInRange] Day 2: 2025-09-10
+2025-09-15 17:04:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:04:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Removed 90 duplicate records in batch 1
+2025-09-15 17:04:54 [INFO]: [upsertBatch] Upserting 4910 records into "media" table...
+2025-09-15 17:04:57 [INFO]: [upsertBatch] ✅ Successfully upserted 4910 records to media.
+2025-09-15 17:04:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 1: Upserted 4910 unique media records
+2025-09-15 17:04:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:04:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Removed 564 duplicate records in batch 2
+2025-09-15 17:04:57 [INFO]: [upsertBatch] Upserting 4436 records into "media" table...
+2025-09-15 17:05:00 [INFO]: [upsertBatch] ✅ Successfully upserted 4436 records to media.
+2025-09-15 17:05:00 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 2: Upserted 4436 unique media records
+2025-09-15 17:05:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:05:01 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:04 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:05:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:05:04 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:07 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:07 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 4: Upserted 5000 unique media records
+2025-09-15 17:05:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:05:09 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:11 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 5: Upserted 5000 unique media records
+2025-09-15 17:05:13 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 6: Fetched 5000 media records (skip=25000)
+2025-09-15 17:05:13 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:16 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:16 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 6: Upserted 5000 unique media records
+2025-09-15 17:05:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 7: Fetched 5000 media records (skip=30000)
+2025-09-15 17:05:17 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:20 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:20 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 7: Upserted 5000 unique media records
+2025-09-15 17:05:20 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 8: Fetched 5000 media records (skip=35000)
+2025-09-15 17:05:20 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:24 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 8: Upserted 5000 unique media records
+2025-09-15 17:05:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 9: Fetched 5000 media records (skip=40000)
+2025-09-15 17:05:25 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:27 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:27 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 9: Upserted 5000 unique media records
+2025-09-15 17:05:28 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 10: Fetched 5000 media records (skip=45000)
+2025-09-15 17:05:28 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:31 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 10: Upserted 5000 unique media records
+2025-09-15 17:05:32 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 11: Fetched 5000 media records (skip=50000)
+2025-09-15 17:05:32 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:35 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:35 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 11: Upserted 5000 unique media records
+2025-09-15 17:05:36 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 12: Fetched 5000 media records (skip=55000)
+2025-09-15 17:05:36 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:39 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 12: Upserted 5000 unique media records
+2025-09-15 17:05:40 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 13: Fetched 5000 media records (skip=60000)
+2025-09-15 17:05:40 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:44 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:44 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 13: Upserted 5000 unique media records
+2025-09-15 17:05:44 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 14: Fetched 5000 media records (skip=65000)
+2025-09-15 17:05:44 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:47 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:47 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 14: Upserted 5000 unique media records
+2025-09-15 17:05:48 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 15: Fetched 5000 media records (skip=70000)
+2025-09-15 17:05:48 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:52 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:52 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 15: Upserted 5000 unique media records
+2025-09-15 17:05:52 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 16: Fetched 5000 media records (skip=75000)
+2025-09-15 17:05:52 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:55 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:55 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 16: Upserted 5000 unique media records
+2025-09-15 17:05:56 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 17: Fetched 5000 media records (skip=80000)
+2025-09-15 17:05:56 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:05:58 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:05:58 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 17: Upserted 5000 unique media records
+2025-09-15 17:05:59 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 18: Fetched 5000 media records (skip=85000)
+2025-09-15 17:05:59 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:02 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:02 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 18: Upserted 5000 unique media records
+2025-09-15 17:06:03 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 19: Fetched 5000 media records (skip=90000)
+2025-09-15 17:06:03 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:06 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:06 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 19: Upserted 5000 unique media records
+2025-09-15 17:06:07 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 20: Fetched 5000 media records (skip=95000)
+2025-09-15 17:06:07 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:09 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Batch 20: Upserted 5000 unique media records
+2025-09-15 17:06:09 [WARN]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Reached API limit of 100,000 records
+2025-09-15 17:06:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-10] Subtotal: Fetched 100000, Unique 283589, Duplicates -183589, Upserted 99346
+2025-09-15 17:06:09 [INFO]: [fetchMediaDailyInRange] Day 2 result: fetched=100000, hitLimit=true
+2025-09-15 17:06:09 [ERROR]: [fetchMediaDailyInRange] Single day 2025-09-10 has more than 100K records!
+2025-09-15 17:06:09 [ERROR]: [fetchMediaDailyInRange] This would require hourly chunking. Skipping some records.
+2025-09-15 17:06:09 [INFO]: [fetchMediaDailyInRange] Day 3: 2025-09-11
+2025-09-15 17:06:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:06:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 205 duplicate records in batch 1
+2025-09-15 17:06:11 [INFO]: [upsertBatch] Upserting 4795 records into "media" table...
+2025-09-15 17:06:14 [INFO]: [upsertBatch] ✅ Successfully upserted 4795 records to media.
+2025-09-15 17:06:14 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 1: Upserted 4795 unique media records
+2025-09-15 17:06:15 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:06:15 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:17 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 2: Upserted 5000 unique media records
+2025-09-15 17:06:18 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:06:18 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:21 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:21 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:06:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:06:22 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:24 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 4: Upserted 5000 unique media records
+2025-09-15 17:06:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:06:25 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:28 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:28 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 5: Upserted 5000 unique media records
+2025-09-15 17:06:28 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 6: Fetched 5000 media records (skip=25000)
+2025-09-15 17:06:28 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:31 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 6: Upserted 5000 unique media records
+2025-09-15 17:06:32 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 7: Fetched 5000 media records (skip=30000)
+2025-09-15 17:06:32 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 5 duplicate records in batch 7
+2025-09-15 17:06:32 [INFO]: [upsertBatch] Upserting 4995 records into "media" table...
+2025-09-15 17:06:35 [INFO]: [upsertBatch] ✅ Successfully upserted 4995 records to media.
+2025-09-15 17:06:35 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 7: Upserted 4995 unique media records
+2025-09-15 17:06:36 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 8: Fetched 5000 media records (skip=35000)
+2025-09-15 17:06:36 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:39 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 8: Upserted 5000 unique media records
+2025-09-15 17:06:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 9: Fetched 5000 media records (skip=40000)
+2025-09-15 17:06:39 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:42 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:42 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 9: Upserted 5000 unique media records
+2025-09-15 17:06:43 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 10: Fetched 5000 media records (skip=45000)
+2025-09-15 17:06:43 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:46 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:46 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 10: Upserted 5000 unique media records
+2025-09-15 17:06:47 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 11: Fetched 5000 media records (skip=50000)
+2025-09-15 17:06:47 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:50 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 11: Upserted 5000 unique media records
+2025-09-15 17:06:51 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 12: Fetched 5000 media records (skip=55000)
+2025-09-15 17:06:51 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:53 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:53 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 12: Upserted 5000 unique media records
+2025-09-15 17:06:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 13: Fetched 5000 media records (skip=60000)
+2025-09-15 17:06:54 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:06:58 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:06:58 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 13: Upserted 5000 unique media records
+2025-09-15 17:06:58 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 14: Fetched 5000 media records (skip=65000)
+2025-09-15 17:06:58 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:01 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 14: Upserted 5000 unique media records
+2025-09-15 17:07:02 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 15: Fetched 5000 media records (skip=70000)
+2025-09-15 17:07:02 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 901 duplicate records in batch 15
+2025-09-15 17:07:02 [INFO]: [upsertBatch] Upserting 4099 records into "media" table...
+2025-09-15 17:07:04 [INFO]: [upsertBatch] ✅ Successfully upserted 4099 records to media.
+2025-09-15 17:07:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 15: Upserted 4099 unique media records
+2025-09-15 17:07:05 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 16: Fetched 5000 media records (skip=75000)
+2025-09-15 17:07:05 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:08 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:08 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 16: Upserted 5000 unique media records
+2025-09-15 17:07:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 17: Fetched 5000 media records (skip=80000)
+2025-09-15 17:07:09 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 443 duplicate records in batch 17
+2025-09-15 17:07:09 [INFO]: [upsertBatch] Upserting 4557 records into "media" table...
+2025-09-15 17:07:12 [INFO]: [upsertBatch] ✅ Successfully upserted 4557 records to media.
+2025-09-15 17:07:12 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 17: Upserted 4557 unique media records
+2025-09-15 17:07:13 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 18: Fetched 5000 media records (skip=85000)
+2025-09-15 17:07:13 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:16 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:16 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 18: Upserted 5000 unique media records
+2025-09-15 17:07:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 19: Fetched 5000 media records (skip=90000)
+2025-09-15 17:07:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 891 duplicate records in batch 19
+2025-09-15 17:07:17 [INFO]: [upsertBatch] Upserting 4109 records into "media" table...
+2025-09-15 17:07:19 [INFO]: [upsertBatch] ✅ Successfully upserted 4109 records to media.
+2025-09-15 17:07:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 19: Upserted 4109 unique media records
+2025-09-15 17:07:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 20: Fetched 5000 media records (skip=95000)
+2025-09-15 17:07:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Removed 935 duplicate records in batch 20
+2025-09-15 17:07:19 [INFO]: [upsertBatch] Upserting 4065 records into "media" table...
+2025-09-15 17:07:22 [INFO]: [upsertBatch] ✅ Successfully upserted 4065 records to media.
+2025-09-15 17:07:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Batch 20: Upserted 4065 unique media records
+2025-09-15 17:07:22 [WARN]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Reached API limit of 100,000 records
+2025-09-15 17:07:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-11] Subtotal: Fetched 100000, Unique 380209, Duplicates -280209, Upserted 96620
+2025-09-15 17:07:22 [INFO]: [fetchMediaDailyInRange] Day 3 result: fetched=100000, hitLimit=true
+2025-09-15 17:07:22 [ERROR]: [fetchMediaDailyInRange] Single day 2025-09-11 has more than 100K records!
+2025-09-15 17:07:22 [ERROR]: [fetchMediaDailyInRange] This would require hourly chunking. Skipping some records.
+2025-09-15 17:07:22 [INFO]: [fetchMediaDailyInRange] Day 4: 2025-09-12
+2025-09-15 17:07:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:07:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 269 duplicate records in batch 1
+2025-09-15 17:07:22 [INFO]: [upsertBatch] Upserting 4731 records into "media" table...
+2025-09-15 17:07:25 [INFO]: [upsertBatch] ✅ Successfully upserted 4731 records to media.
+2025-09-15 17:07:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 1: Upserted 4731 unique media records
+2025-09-15 17:07:26 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:07:26 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:29 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:29 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 2: Upserted 5000 unique media records
+2025-09-15 17:07:29 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:07:29 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:32 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:32 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:07:33 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:07:33 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:35 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:35 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 4: Upserted 5000 unique media records
+2025-09-15 17:07:37 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:07:37 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:39 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:39 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 5: Upserted 5000 unique media records
+2025-09-15 17:07:40 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 6: Fetched 5000 media records (skip=25000)
+2025-09-15 17:07:40 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:42 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:42 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 6: Upserted 5000 unique media records
+2025-09-15 17:07:43 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 7: Fetched 5000 media records (skip=30000)
+2025-09-15 17:07:43 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:46 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:46 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 7: Upserted 5000 unique media records
+2025-09-15 17:07:46 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 8: Fetched 5000 media records (skip=35000)
+2025-09-15 17:07:46 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:49 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:49 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 8: Upserted 5000 unique media records
+2025-09-15 17:07:50 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 9: Fetched 5000 media records (skip=40000)
+2025-09-15 17:07:50 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:53 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:53 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 9: Upserted 5000 unique media records
+2025-09-15 17:07:54 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 10: Fetched 5000 media records (skip=45000)
+2025-09-15 17:07:54 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:07:57 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:07:57 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 10: Upserted 5000 unique media records
+2025-09-15 17:07:58 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 11: Fetched 5000 media records (skip=50000)
+2025-09-15 17:07:58 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:00 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:00 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 11: Upserted 5000 unique media records
+2025-09-15 17:08:01 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 12: Fetched 5000 media records (skip=55000)
+2025-09-15 17:08:01 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:04 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 12: Upserted 5000 unique media records
+2025-09-15 17:08:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 13: Fetched 5000 media records (skip=60000)
+2025-09-15 17:08:04 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 497 duplicate records in batch 13
+2025-09-15 17:08:04 [INFO]: [upsertBatch] Upserting 4503 records into "media" table...
+2025-09-15 17:08:07 [INFO]: [upsertBatch] ✅ Successfully upserted 4503 records to media.
+2025-09-15 17:08:07 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 13: Upserted 4503 unique media records
+2025-09-15 17:08:08 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 14: Fetched 5000 media records (skip=65000)
+2025-09-15 17:08:08 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:11 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 14: Upserted 5000 unique media records
+2025-09-15 17:08:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 15: Fetched 5000 media records (skip=70000)
+2025-09-15 17:08:11 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 772 duplicate records in batch 15
+2025-09-15 17:08:11 [INFO]: [upsertBatch] Upserting 4228 records into "media" table...
+2025-09-15 17:08:13 [INFO]: [upsertBatch] ✅ Successfully upserted 4228 records to media.
+2025-09-15 17:08:13 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 15: Upserted 4228 unique media records
+2025-09-15 17:08:14 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 16: Fetched 5000 media records (skip=75000)
+2025-09-15 17:08:14 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 533 duplicate records in batch 16
+2025-09-15 17:08:14 [INFO]: [upsertBatch] Upserting 4467 records into "media" table...
+2025-09-15 17:08:17 [INFO]: [upsertBatch] ✅ Successfully upserted 4467 records to media.
+2025-09-15 17:08:17 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 16: Upserted 4467 unique media records
+2025-09-15 17:08:18 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 17: Fetched 5000 media records (skip=80000)
+2025-09-15 17:08:18 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 2521 duplicate records in batch 17
+2025-09-15 17:08:18 [INFO]: [upsertBatch] Upserting 2479 records into "media" table...
+2025-09-15 17:08:19 [INFO]: [upsertBatch] ✅ Successfully upserted 2479 records to media.
+2025-09-15 17:08:19 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 17: Upserted 2479 unique media records
+2025-09-15 17:08:20 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 18: Fetched 5000 media records (skip=85000)
+2025-09-15 17:08:20 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 3228 duplicate records in batch 18
+2025-09-15 17:08:20 [INFO]: [upsertBatch] Upserting 1772 records into "media" table...
+2025-09-15 17:08:21 [INFO]: [upsertBatch] ✅ Successfully upserted 1772 records to media.
+2025-09-15 17:08:21 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 18: Upserted 1772 unique media records
+2025-09-15 17:08:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 19: Fetched 5000 media records (skip=90000)
+2025-09-15 17:08:22 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 2556 duplicate records in batch 19
+2025-09-15 17:08:22 [INFO]: [upsertBatch] Upserting 2444 records into "media" table...
+2025-09-15 17:08:23 [INFO]: [upsertBatch] ✅ Successfully upserted 2444 records to media.
+2025-09-15 17:08:23 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 19: Upserted 2444 unique media records
+2025-09-15 17:08:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Batch 20: Fetched 5000 media records (skip=95000)
+2025-09-15 17:08:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Removed 5000 duplicate records in batch 20
+2025-09-15 17:08:24 [WARN]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Reached API limit of 100,000 records
+2025-09-15 17:08:24 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-12] Subtotal: Fetched 95000, Unique 464833, Duplicates -369833, Upserted 84624
+2025-09-15 17:08:24 [INFO]: [fetchMediaDailyInRange] Day 4 result: fetched=95000, hitLimit=true
+2025-09-15 17:08:24 [ERROR]: [fetchMediaDailyInRange] Single day 2025-09-12 has more than 100K records!
+2025-09-15 17:08:24 [ERROR]: [fetchMediaDailyInRange] This would require hourly chunking. Skipping some records.
+2025-09-15 17:08:24 [INFO]: [fetchMediaDailyInRange] Day 5: 2025-09-13
+2025-09-15 17:08:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 1: Fetched 5000 media records (skip=0)
+2025-09-15 17:08:25 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Removed 28 duplicate records in batch 1
+2025-09-15 17:08:25 [INFO]: [upsertBatch] Upserting 4972 records into "media" table...
+2025-09-15 17:08:27 [INFO]: [upsertBatch] ✅ Successfully upserted 4972 records to media.
+2025-09-15 17:08:27 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 1: Upserted 4972 unique media records
+2025-09-15 17:08:28 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 2: Fetched 5000 media records (skip=5000)
+2025-09-15 17:08:28 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:30 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:30 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 2: Upserted 5000 unique media records
+2025-09-15 17:08:31 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 3: Fetched 5000 media records (skip=10000)
+2025-09-15 17:08:31 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:33 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:33 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 3: Upserted 5000 unique media records
+2025-09-15 17:08:34 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 4: Fetched 5000 media records (skip=15000)
+2025-09-15 17:08:34 [INFO]: [upsertBatch] Upserting 5000 records into "media" table...
+2025-09-15 17:08:37 [INFO]: [upsertBatch] ✅ Successfully upserted 5000 records to media.
+2025-09-15 17:08:37 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 4: Upserted 5000 unique media records
+2025-09-15 17:08:38 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 5: Fetched 5000 media records (skip=20000)
+2025-09-15 17:08:38 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Removed 557 duplicate records in batch 5
+2025-09-15 17:08:38 [INFO]: [upsertBatch] Upserting 4443 records into "media" table...
+2025-09-15 17:08:40 [INFO]: [upsertBatch] ✅ Successfully upserted 4443 records to media.
+2025-09-15 17:08:40 [INFO]: [fetchAndUpsertMediaBatches:MEDIA-day-2025-09-13] Batch 5: Upserted 4443 unique media records

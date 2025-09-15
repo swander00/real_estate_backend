@@ -10,7 +10,8 @@
     "sync:vow": "node sync.js --vow-only",
     "sync:media": "node sync.js --media-only",
     "sync:incremental": "node sync.js --incremental",
-    "check-env": "node checkEnv.js",
+    "check-env": "node check-env.js",
+    "test:media": "node test-media-sync.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
