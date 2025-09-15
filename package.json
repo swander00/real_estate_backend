@@ -1,0 +1,32 @@
+{
+  "name": "trreb-reso-sync",
+  "version": "1.0.0",
+  "description": "TRREB RESO Web API to Supabase synchronization service",
+  "main": "sync.js",
+  "private": true,
+  "scripts": {
+    "sync": "node sync.js",
+    "sync:idx": "node sync.js --idx-only",
+    "sync:vow": "node sync.js --vow-only",
+    "sync:media": "node sync.js --media-only",
+    "sync:incremental": "node sync.js --incremental",
+    "check-env": "node checkEnv.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "trreb",
+    "reso",
+    "real-estate",
+    "sync",
+    "supabase"
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.6.1",
+    "node-fetch": "^3.3.2",
+    "winston": "^3.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
